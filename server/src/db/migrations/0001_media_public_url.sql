@@ -1,0 +1,1 @@
+ALTER TABLE `media_assets` ADD `public_url` varchar(512);
