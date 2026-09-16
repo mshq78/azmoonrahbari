@@ -250,6 +250,18 @@ endpoint returns a real 404 instead of a blank page.
 
 ## Deploying to a Node host
 
+> **This app needs a long-lived Node process, not a serverless platform.**
+> It holds a MySQL connection pool, rate-limits in process memory, writes
+> uploads to a local directory, and takes a row lock (`SELECT … FOR UPDATE`)
+> across a finalize. On a serverless host the uploads directory is ephemeral,
+> the rate limiter becomes per-instance and ineffective, and a pool per
+> invocation exhausts the database's connection limit.
+>
+> Pointing a platform's "output directory" at `client/dist` will build and
+> deploy, but it ships the SPA with no API behind it: every `/api/*` call 404s
+> and nothing works past the entry screen. A VPS or any host that runs
+> `node server/dist/server.js` as a service is the supported target.
+
 1. **Provision** Node 20+, MySQL 8, and a persistent directory for uploads.
 2. **Copy the code** (git clone or an artifact upload) and run `npm ci`.
 3. **Configure** `.env`, with `NODE_ENV=production`, `COOKIE_SECURE=true`,
