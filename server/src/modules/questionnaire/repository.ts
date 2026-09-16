@@ -38,7 +38,10 @@ export async function setSetting(key: string, value: string, conn: DbOrTx = db):
   await conn
     .insert(appSettings)
     .values({ settingKey: key, settingValue: value, updatedAt: now })
-    .onDuplicateKeyUpdate({ set: { settingValue: value, updatedAt: now } });
+    .onConflictDoUpdate({
+      target: appSettings.settingKey,
+      set: { settingValue: value, updatedAt: now },
+    });
 }
 
 export async function getVersionById(

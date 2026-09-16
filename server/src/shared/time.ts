@@ -1,15 +1,15 @@
 /**
- * All timestamps are stored in UTC. MySQL DATETIME columns carry no timezone,
- * so we convert explicitly at both ends instead of relying on the connection
- * or the host's local zone.
+ * All timestamps are stored in UTC, in `timestamptz` columns. Postgres keeps
+ * the instant rather than a wall-clock reading, and the driver hands it back as
+ * a Date, so the round trip is exact whatever zone the host is in.
  */
 
-/** The current instant, as a Date whose fields are the UTC wall-clock values MySQL should store. */
+/** The current instant. */
 export function nowUtc(): Date {
   return new Date();
 }
 
-/** Serializes a DATETIME read back from MySQL as a UTC ISO-8601 string. */
+/** Serializes a timestamp read back from the database as a UTC ISO-8601 string. */
 export function toIso(value: Date | string | null | undefined): string | null {
   if (value === null || value === undefined) return null;
   const date = value instanceof Date ? value : new Date(value);

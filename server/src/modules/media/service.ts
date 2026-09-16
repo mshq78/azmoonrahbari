@@ -25,14 +25,9 @@ export async function createMediaAsset(input: {
       uploadedByAdminId: input.adminId,
       isActive: true,
       createdAt: now,
-    });
+    }).returning();
 
-    const [row] = await db
-      .select()
-      .from(mediaAssets)
-      .where(eq(mediaAssets.id, Number(inserted.insertId)))
-      .limit(1);
-    return toAdminMediaAsset(row, 0);
+    return toAdminMediaAsset(inserted, 0);
   } catch (error) {
     // Do not leave an orphan file behind if the row could not be written.
     await storage.delete(stored).catch(() => undefined);

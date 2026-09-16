@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { migrate } from 'drizzle-orm/mysql2/migrator';
+import { migrate } from 'drizzle-orm/neon-serverless/migrator';
 import { closeDb, db } from './client';
 
 const migrationsFolder = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'migrations');

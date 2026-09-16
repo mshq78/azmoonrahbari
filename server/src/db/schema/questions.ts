@@ -1,32 +1,35 @@
 import {
   boolean,
-  datetime,
   index,
-  int,
-  mysqlTable,
+  integer,
+  pgTable,
+  serial,
   smallint,
   text,
+  timestamp,
   uniqueIndex,
   varchar,
-} from 'drizzle-orm/mysql-core';
+} from 'drizzle-orm/pg-core';
 import { testVersions } from './testVersions';
 import { mediaAssets } from './mediaAssets';
 
-export const questions = mysqlTable(
+export const questions = pgTable(
   'questions',
   {
-    id: int('id').autoincrement().primaryKey(),
-    testVersionId: int('test_version_id')
+    id: serial('id').primaryKey(),
+    testVersionId: integer('test_version_id')
       .notNull()
       .references(() => testVersions.id, { onDelete: 'cascade' }),
     code: varchar('code', { length: 32 }).notNull(),
     text: text('text').notNull(),
     displayOrder: smallint('display_order').notNull(),
     isTieBreaker: boolean('is_tie_breaker').notNull().default(false),
-    imageAssetId: int('image_asset_id').references(() => mediaAssets.id, { onDelete: 'set null' }),
+    imageAssetId: integer('image_asset_id').references(() => mediaAssets.id, {
+      onDelete: 'set null',
+    }),
     isActive: boolean('is_active').notNull().default(true),
-    createdAt: datetime('created_at').notNull(),
-    updatedAt: datetime('updated_at').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
   (t) => ({
     versionCodeUnique: uniqueIndex('uq_questions_version_code').on(t.testVersionId, t.code),

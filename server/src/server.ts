@@ -3,7 +3,7 @@ import { createApp } from './app';
 import { env } from './config/index';
 import { closeDb, pool } from './db/client';
 import { purgeStaleAdminSessions } from './modules/auth/service';
-import { logger } from './shared/logger';
+import { describeError, logger } from './shared/logger';
 import { storage } from './storage/index';
 
 const SESSION_PURGE_INTERVAL_MS = 60 * 60 * 1000;
@@ -12,8 +12,14 @@ async function main(): Promise<void> {
   await storage.init();
 
   // Fail fast if the database is unreachable, rather than serving 500s.
-  const connection = await pool.getConnection();
-  connection.release();
+  try {
+    const connection = await pool.connect();
+    connection.release();
+  } catch (error) {
+    throw new Error(
+      `Cannot reach the database: ${describeError(error)}. Check DATABASE_URL, and that this host is allowed to connect.`,
+    );
+  }
 
   const app = createApp();
   const server: Server = app.listen(env.PORT, env.HOST, () => {
@@ -50,8 +56,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  logger.error('failed to start', {
-    message: error instanceof Error ? error.message : String(error),
-  });
+  logger.error('failed to start', { message: describeError(error) });
   process.exit(1);
 });

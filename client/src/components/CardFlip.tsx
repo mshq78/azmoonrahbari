@@ -25,9 +25,11 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* 3D Card Container (Portrait 2:3, max-width 420px) */}
+      {/* 3D Card Container. The aspect ratio matches the card artwork in
+          `public/cards` (1000x1333), so `object-cover` never crops the text
+          baked into those images. */}
       <div
-        className="w-full max-w-[360px] sm:max-w-[400px] aspect-[2/3] relative cursor-pointer select-none group"
+        className="w-full max-w-[360px] sm:max-w-[400px] aspect-[3/4] relative cursor-pointer select-none group"
         style={{ perspective: '1200px' }}
         role="button"
         tabIndex={0}

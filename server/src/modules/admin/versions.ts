@@ -99,8 +99,8 @@ export async function cloneActiveVersion(): Promise<TestVersionRow> {
       notes: source.notes,
       createdAt: now,
       updatedAt: now,
-    });
-    const newVersionId = Number(inserted.insertId);
+    }).returning({ id: testVersions.id });
+    const newVersionId = inserted.id;
 
     const sourceQuestions = await tx
       .select()
@@ -119,8 +119,8 @@ export async function cloneActiveVersion(): Promise<TestVersionRow> {
         isActive: question.isActive,
         createdAt: now,
         updatedAt: now,
-      });
-      const newQuestionId = Number(insertedQuestion.insertId);
+      }).returning({ id: questions.id });
+      const newQuestionId = insertedQuestion.id;
 
       const sourceOptions = await tx
         .select()

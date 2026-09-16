@@ -81,9 +81,9 @@ export async function createAdminSession(
     expiresAt,
     createdAt: now,
     lastSeenAt: now,
-  });
+  }).returning({ id: adminSessions.id });
 
-  const sessionId = Number(inserted.insertId);
+  const sessionId = inserted.id;
   const maxAgeMs = env.ADMIN_SESSION_TTL_HOURS * 60 * 60 * 1000;
 
   res.cookie(

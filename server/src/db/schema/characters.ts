@@ -1,10 +1,10 @@
-import { boolean, mysqlTable, smallint, varchar } from 'drizzle-orm/mysql-core';
+import { boolean, pgTable, smallint, varchar } from 'drizzle-orm/pg-core';
 
 /**
  * The five historical characters. `code` is the primary key and is the value
  * stored in `options.internalValue` — the scoring map lives there and nowhere else.
  */
-export const characters = mysqlTable('characters', {
+export const characters = pgTable('characters', {
   code: varchar('code', { length: 32 }).primaryKey(),
   displayName: varchar('display_name', { length: 191 }).notNull(),
   years: varchar('years', { length: 64 }).notNull(),

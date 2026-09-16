@@ -81,7 +81,8 @@ async function main(): Promise<void> {
           tieOrder: character.tieOrder,
           isActive: true,
         })
-        .onDuplicateKeyUpdate({
+        .onConflictDoUpdate({
+          target: characters.code,
           set: {
             displayName: character.displayName,
             years: character.years,
@@ -156,9 +157,9 @@ async function ensureVersion(tx: Tx, versionNumber: number, now: Date): Promise<
     publishedAt: status === 'Published' ? now : null,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning({ id: testVersions.id });
 
-  const versionId = Number(inserted.insertId);
+  const versionId = inserted.id;
   log(`version #${versionNumber} created (id ${versionId}, ${status})`);
 
   if (status === 'Published') {
@@ -204,8 +205,8 @@ async function upsertQuestion(
     isActive: true,
     createdAt: now,
     updatedAt: now,
-  });
-  return Number(inserted.insertId);
+  }).returning({ id: questions.id });
+  return inserted.id;
 }
 
 async function upsertOption(

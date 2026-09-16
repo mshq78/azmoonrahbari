@@ -32,3 +32,29 @@ export const logger = {
   warn: (message: string, meta?: Record<string, unknown>) => emit('warn', message, meta),
   error: (message: string, meta?: Record<string, unknown>) => emit('error', message, meta),
 };
+
+/**
+ * A readable one-line description of anything that was thrown.
+ *
+ * Not everything that reaches a catch block is an `Error`. The Neon driver
+ * surfaces a failed connection as a DOM-style `ErrorEvent`, which stringifies
+ * to `[object ErrorEvent]` and would otherwise hide the only detail that
+ * matters — whether the URL, the credentials or the network is wrong.
+ */
+export function describeError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null) {
+    const candidate = error as { message?: unknown; error?: unknown; type?: unknown };
+    if (typeof candidate.message === 'string' && candidate.message.length > 0) {
+      return candidate.message;
+    }
+    // ErrorEvent nests the real cause under `error`.
+    if (candidate.error !== undefined && candidate.error !== error) {
+      return describeError(candidate.error);
+    }
+    if (typeof candidate.type === 'string' && candidate.type.length > 0) {
+      return `${candidate.type} event`;
+    }
+  }
+  return String(error);
+}

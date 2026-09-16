@@ -57,8 +57,8 @@ export async function createQuestion(
         isActive: true,
         createdAt: now,
         updatedAt: now,
-      });
-      return Number(inserted.insertId);
+      }).returning({ id: questions.id });
+      return inserted.id;
     } catch (error) {
       throw asDuplicateConflict(error, ERROR_CODES.DUPLICATE_CODE);
     }

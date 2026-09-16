@@ -1,24 +1,25 @@
 import {
   boolean,
-  datetime,
-  decimal,
   index,
-  int,
-  json,
-  mysqlTable,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  serial,
   smallint,
   text,
+  timestamp,
   uniqueIndex,
   varchar,
-} from 'drizzle-orm/mysql-core';
+} from 'drizzle-orm/pg-core';
 import { questions } from './questions';
 import { mediaAssets } from './mediaAssets';
 
-export const options = mysqlTable(
+export const options = pgTable(
   'options',
   {
-    id: int('id').autoincrement().primaryKey(),
-    questionId: int('question_id')
+    id: serial('id').primaryKey(),
+    questionId: integer('question_id')
       .notNull()
       .references(() => questions.id, { onDelete: 'cascade' }),
     code: varchar('code', { length: 32 }).notNull(),
@@ -29,12 +30,14 @@ export const options = mysqlTable(
      * must never emit this field (nor `score` / `scoringMetadata`).
      */
     internalValue: varchar('internal_value', { length: 32 }).notNull(),
-    score: decimal('score', { precision: 6, scale: 2 }).notNull().default('1'),
-    scoringMetadata: json('scoring_metadata'),
-    imageAssetId: int('image_asset_id').references(() => mediaAssets.id, { onDelete: 'set null' }),
+    score: numeric('score', { precision: 6, scale: 2 }).notNull().default('1'),
+    scoringMetadata: jsonb('scoring_metadata'),
+    imageAssetId: integer('image_asset_id').references(() => mediaAssets.id, {
+      onDelete: 'set null',
+    }),
     isActive: boolean('is_active').notNull().default(true),
-    createdAt: datetime('created_at').notNull(),
-    updatedAt: datetime('updated_at').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
   (t) => ({
     questionCodeUnique: uniqueIndex('uq_options_question_code').on(t.questionId, t.code),

@@ -85,14 +85,15 @@ const envSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     HOST: z.string().default('0.0.0.0'),
 
-    DB_HOST: z.string().default('127.0.0.1'),
-    DB_PORT: z.coerce.number().int().min(1).max(65535).default(3306),
-    DB_USER: z.string().min(1),
-    DB_PASSWORD: z.string().default(''),
-    DB_NAME: z.string().min(1),
+    /**
+     * Standard Postgres URL, e.g. the one Neon shows on the project dashboard:
+     * postgresql://user:password@host/dbname?sslmode=require
+     * On Neon, use the pooled host (the one containing `-pooler`).
+     */
+    DATABASE_URL: z.string().min(1).url(),
     DB_POOL_SIZE: z.coerce.number().int().min(1).max(100).default(10),
-    /** Managed MySQL almost always requires TLS; a local socket almost never does. */
-    DB_SSL: booleanish(false),
+    /** Managed Postgres always requires TLS; a local socket almost never does. */
+    DB_SSL: booleanish(true),
     /** Set false only for a managed host with a self-signed chain you have verified. */
     DB_SSL_REJECT_UNAUTHORIZED: booleanish(true),
 

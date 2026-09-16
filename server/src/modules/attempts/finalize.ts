@@ -314,7 +314,10 @@ async function upsertAnswer(
       createdAt: now,
       updatedAt: now,
     })
-    .onDuplicateKeyUpdate({ set: { selectedOptionId: optionId, updatedAt: now } });
+    .onConflictDoUpdate({
+      target: [answers.attemptId, answers.questionId],
+      set: { selectedOptionId: optionId, updatedAt: now },
+    });
 }
 
 async function findIdempotencyRecord(tx: Tx, key: string) {

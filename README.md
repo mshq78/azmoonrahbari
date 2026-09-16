@@ -25,6 +25,7 @@ same-origin and there is no CORS layer to maintain.
 - [Deploying to Vercel](#deploying-to-vercel)
 - [Backups](#backups)
 - [API reference](#api-reference)
+- [Result card artwork](#result-card-artwork)
 - [How scoring works](#how-scoring-works)
 - [Security notes](#security-notes)
 - [Operational notes](#operational-notes)
@@ -38,7 +39,7 @@ same-origin and there is no CORS layer to maintain.
 | Runtime   | Node 20 LTS or newer                                               |
 | Language  | TypeScript, `strict` on both sides                                 |
 | API       | Express 4, Zod on every request                                    |
-| Database  | MySQL 8 (or a compatible MariaDB) via Drizzle ORM and `mysql2`     |
+| Database  | Postgres 14+ via Drizzle ORM and Neon's serverless driver         |
 | Sessions  | Signed `HttpOnly` cookies; admin sessions also tracked in the DB   |
 | Passwords | Node's built-in `scrypt`                                           |
 | Frontend  | React 18/19, Vite, React Router, TanStack Query, Dexie, Tailwind 4 |
@@ -59,6 +60,9 @@ spelled out there.
 .
 ├── api/index.ts                Serverless entry point (Vercel); wraps the same app
 ├── client/                     React SPA (participant game + admin panel)
+│   ├── public/
+│   │   ├── cards/              The ten result-card images (5 characters x 2 sides)
+│   │   └── fonts/              Vazirmatn, self-hosted
 │   ├── src/
 │   │   ├── components/         Shared UI primitives
 │   │   ├── content/            All Persian copy (no strings inside components)
@@ -96,17 +100,20 @@ spelled out there.
 ## Prerequisites
 
 - **Node.js 20.11+** and npm 10+ (`node -v`)
-- **MySQL 8** or a compatible **MariaDB 10.11+**, reachable over TCP
-- A database and a user with full rights on it:
+- **A Postgres 14+ database.** The app is developed against [Neon](https://neon.tech),
+  whose free tier is enough for it, but any Postgres works — managed or your own.
 
-```sql
-CREATE DATABASE azmoonrahbari CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'azmoon'@'localhost' IDENTIFIED BY 'a-strong-password';
-GRANT ALL PRIVILEGES ON azmoonrahbari.* TO 'azmoon'@'localhost';
-FLUSH PRIVILEGES;
+On Neon: create a project, then take the connection string from
+**Dashboard → Connect**. Use the **pooled** one (its host contains `-pooler`);
+that is the endpoint sized for many short-lived connections.
+
+```
+postgresql://user:password@ep-xxxx-pooler.region.aws.neon.tech/dbname?sslmode=require
 ```
 
-`utf8mb4` matters: the content is Persian, and `utf8mb3` cannot store all of it.
+That single URL is the whole database configuration — it goes in `DATABASE_URL`.
+Postgres databases are UTF-8 by default, so the Persian content needs no
+special collation setup.
 
 ---
 
@@ -139,7 +146,7 @@ Every key is documented in `.env.example`. The ones that matter most:
 | Key                | Notes                                                                |
 | ------------------ | -------------------------------------------------------------------- |
 | `SESSION_SECRET`   | Required, ≥32 chars, unique per environment. Rotating it logs everyone out. |
-| `DB_*`             | Connection details for MySQL.                                         |
+| `DATABASE_URL`     | The full Postgres URL. On Neon, the pooled one.                       |
 | `COOKIE_SECURE`    | **Must be `true` in production** — the server refuses to start otherwise. |
 | `TRUST_PROXY`      | `true` behind nginx/Caddy/a load balancer, so client IPs and the protocol come from `X-Forwarded-*`. |
 | `ALLOWED_ORIGINS`  | Comma-separated. Leave empty to accept only the request's own host.   |
@@ -258,7 +265,8 @@ endpoint returns a real 404 instead of a blank page.
 
 ## Deploying to a Node host
 
-1. **Provision** Node 20+, MySQL 8, and a persistent directory for uploads.
+1. **Provision** Node 20+, a Postgres database it can reach, and a persistent
+   directory for uploads.
 2. **Copy the code** (git clone or an artifact upload) and run `npm ci`.
 3. **Configure** `.env`, with `NODE_ENV=production`, `COOKIE_SECURE=true`,
    `TRUST_PROXY=true` if behind a proxy, and `ALLOWED_ORIGINS` set to your public
@@ -276,7 +284,7 @@ endpoint returns a real 404 instead of a blank page.
    # /etc/systemd/system/azmoonrahbari.service
    [Unit]
    Description=Azmoon Rahbari
-   After=network.target mysql.service
+   After=network.target
 
    [Service]
    Type=simple
@@ -345,21 +353,23 @@ single long-lived process:
 
 ### Steps
 
-1. **A publicly reachable MySQL 8.** A function cannot see `127.0.0.1`. Use a
-   managed MySQL, or your own server with remote access and TLS. Set `DB_SSL=true`.
+1. **A publicly reachable Postgres.** A function cannot see `127.0.0.1`. Neon is
+   the intended pairing here: its pooled endpoint is built for exactly this
+   traffic shape, and the driver this app uses reaches it over HTTPS rather than
+   a raw socket, so there is no TCP handshake on every cold start.
 2. **Create a Blob store** on the project (Storage → Blob). Vercel injects
    `BLOB_READ_WRITE_TOKEN` automatically.
-3. **Set the environment variables** on the project: `DB_HOST`, `DB_PORT`,
-   `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL=true`, `DB_POOL_SIZE=2`,
-   `SESSION_SECRET`, `STORAGE_DRIVER=blob`, `ALLOWED_ORIGINS=https://<your-domain>`.
+3. **Set the environment variables** on the project: `DATABASE_URL`,
+   `DB_POOL_SIZE=2`, `SESSION_SECRET`, `STORAGE_DRIVER=blob`,
+   `ALLOWED_ORIGINS=https://<your-domain>`.
    `NODE_ENV`, `COOKIE_SECURE`, `TRUST_PROXY` and `SERVE_CLIENT` are correct by
    default on Vercel and do not need setting.
 4. **Run the migrations and the seed once, from your own machine**, pointed at
    that database — there is no shell on Vercel:
    ```bash
-   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run db:migrate
-   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run seed:content
-   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run create:admin -- --username admin --display-name "…"
+   DATABASE_URL='postgresql://…' npm run db:migrate
+   DATABASE_URL='postgresql://…' npm run seed:content
+   DATABASE_URL='postgresql://…' npm run create:admin -- --username admin --display-name "…"
    ```
    Repeat `db:migrate` after any deploy that adds a migration.
 5. **Deploy.** Pushing to the connected branch is enough.
@@ -375,8 +385,9 @@ These are real trade-offs, not warnings to wave away:
   and the `SELECT … FOR UPDATE` row lock. Those are the protections that matter
   for correctness; the rate limit is only a throttle.
 - **Connections are per instance.** Each warm instance opens its own pool, so
-  `DB_POOL_SIZE` multiplies by the number of instances. Keep it at 1–2 and make
-  sure the database's `max_connections` has headroom, or put a pooler in front.
+  `DB_POOL_SIZE` multiplies by the number of instances. Keep it at 1–2. On Neon
+  the pooled endpoint already is the pooler, so this is about not wasting its
+  budget rather than about exhausting the database.
 - **Cold starts** add roughly a second to the first request after idle.
 - **Uploaded images leave your origin.** They are served from
   `*.public.blob.vercel-storage.com`, which the CSP allows explicitly. They are
@@ -398,15 +409,18 @@ or results pointing at files that no longer exist:
 **1. The database**
 
 ```bash
-mysqldump --single-transaction --routines --default-character-set=utf8mb4 \
-  -u azmoon -p azmoonrahbari | gzip > backup-$(date +%F).sql.gz
+pg_dump "$DATABASE_URL" --no-owner --no-privileges | gzip > backup-$(date +%F).sql.gz
 ```
 
 Restore:
 
 ```bash
-gunzip -c backup-2026-01-31.sql.gz | mysql -u azmoon -p azmoonrahbari
+gunzip -c backup-2026-01-31.sql.gz | psql "$DATABASE_URL"
 ```
+
+On Neon this is belt-and-braces: the project keeps its own point-in-time history
+(**Branches → Restore**), which covers an accidental delete without a dump. It
+does not cover losing the Neon account, which is what the dump is for.
 
 **2. The uploads directory** (`UPLOAD_DIR`, `./uploads` by default)
 
@@ -462,6 +476,27 @@ endpoint.
 `GET /exports/attempts.csv` · `GET|POST /media` · `DELETE /media/:id`
 
 Every list endpoint is paginated and bounded (`pageSize` ≤ 100).
+
+---
+
+## Result card artwork
+
+The five result cards live in `client/public/cards/` as ten WebP files, named
+`<character>_front.webp` and `<character>_back.webp` in lowercase — `davinci`,
+`lincoln`, `churchill`, `einstein`, `edison`. `client/src/content/characters.fa.ts`
+points at them.
+
+They are complete cards: the Persian copy is part of the artwork, not text laid
+over it. Two things follow from that.
+
+- **Keep the 3:4 aspect ratio** (the files are 1000x1333). `CardFlip` sets its
+  container to `aspect-[3/4]` to match, and the image is drawn with
+  `object-cover` — at any other ratio the text at the edges gets cropped.
+- **Replacing a card means replacing the image**, not editing a string. There is
+  no copy in the database or in the client for the body of a card.
+
+If an image is missing, `CardFlip` falls back to a typographic card built from
+`characters.fa.ts`, so a failed upload degrades instead of breaking the screen.
 
 ---
 

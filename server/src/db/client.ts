@@ -1,28 +1,35 @@
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
+import { neonConfig, Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from 'ws';
 import { env } from '../config/index';
 import * as schema from './schema/index';
 
-export const pool = mysql.createPool({
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  database: env.DB_NAME,
-  connectionLimit: env.DB_POOL_SIZE,
-  waitForConnections: true,
-  // Managed MySQL requires TLS; a local socket does not.
-  ...(env.DB_SSL
-    ? { ssl: { rejectUnauthorized: env.DB_SSL_REJECT_UNAUTHORIZED } }
-    : {}),
-  charset: 'utf8mb4',
-  // All timestamps are stored and read as UTC; see shared/time.ts.
-  timezone: 'Z',
-  supportBigNumbers: true,
-  dateStrings: false,
+/**
+ * Neon's driver, over a WebSocket rather than a raw Postgres socket.
+ *
+ * It speaks the same protocol as `pg` — real sessions, so `db.transaction()`
+ * and the `SELECT … FOR UPDATE` in finalize behave exactly as they would on a
+ * TCP connection — but it reaches the database over port 443. That is what
+ * makes it work unchanged on a serverless host, where outbound TCP is slow to
+ * set up and connections cannot be kept warm between invocations.
+ *
+ * `Pool` here is API-compatible with `pg.Pool`, so swapping back to plain
+ * `pg` + `drizzle-orm/node-postgres` is a two-line change if this app ever
+ * moves off Neon.
+ */
+
+// Node has no global WebSocket in the versions this app targets; browsers and
+// edge runtimes do, and there the driver uses the built-in one.
+if (typeof globalThis.WebSocket === 'undefined') {
+  neonConfig.webSocketConstructor = ws;
+}
+
+export const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+  max: env.DB_POOL_SIZE,
 });
 
-export const db = drizzle(pool, { schema, mode: 'default' });
+export const db = drizzle(pool, { schema });
 
 export type Database = typeof db;
 /** The transaction handle drizzle hands to `db.transaction(...)`. */

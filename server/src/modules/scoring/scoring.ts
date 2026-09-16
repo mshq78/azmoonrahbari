@@ -27,7 +27,7 @@ export function tallyAnswers(answers: readonly ScoredAnswer[]): TallyResult {
   for (const { question, option } of answers) {
     if (question.isTieBreaker) continue;
     const character = option.internalValue;
-    // `score` is DECIMAL, which mysql2 returns as a string.
+    // `score` is NUMERIC, which the Postgres driver returns as a string.
     const points = Number(option.score);
     tally[character] = round2((tally[character] ?? 0) + (Number.isFinite(points) ? points : 0));
   }

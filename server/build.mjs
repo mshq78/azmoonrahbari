@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 
 /**
- * Bundles the server. Dependencies stay external so native modules (mysql2)
+ * Bundles the server. Dependencies stay external so native modules (the Neon driver)
  * load normally from node_modules; only our own source and the shared contracts
  * are inlined.
  *

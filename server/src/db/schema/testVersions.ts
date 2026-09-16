@@ -1,25 +1,28 @@
 import {
-  datetime,
-  int,
-  mysqlEnum,
-  mysqlTable,
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
   text,
+  timestamp,
   uniqueIndex,
   varchar,
-} from 'drizzle-orm/mysql-core';
+} from 'drizzle-orm/pg-core';
 import { TEST_VERSION_STATUSES } from '../../../../shared/contracts/constants';
 
-export const testVersions = mysqlTable(
+export const testVersionStatus = pgEnum('test_version_status', TEST_VERSION_STATUSES);
+
+export const testVersions = pgTable(
   'test_versions',
   {
-    id: int('id').autoincrement().primaryKey(),
-    versionNumber: int('version_number').notNull(),
-    status: mysqlEnum('status', TEST_VERSION_STATUSES).notNull().default('Draft'),
+    id: serial('id').primaryKey(),
+    versionNumber: integer('version_number').notNull(),
+    status: testVersionStatus('status').notNull().default('Draft'),
     title: varchar('title', { length: 191 }),
     notes: text('notes'),
-    publishedAt: datetime('published_at'),
-    createdAt: datetime('created_at').notNull(),
-    updatedAt: datetime('updated_at').notNull(),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
   (t) => ({
     versionNumberUnique: uniqueIndex('uq_test_versions_version_number').on(t.versionNumber),

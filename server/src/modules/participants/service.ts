@@ -107,8 +107,7 @@ export async function findOrCreateParticipant(
   return created;
 }
 
+/** Postgres SQLSTATE 23505 — unique_violation. */
 export function isDuplicateKeyError(error: unknown): boolean {
-  const code = (error as { code?: string; errno?: number } | null)?.code;
-  const errno = (error as { errno?: number } | null)?.errno;
-  return code === 'ER_DUP_ENTRY' || errno === 1062;
+  return (error as { code?: string } | null)?.code === '23505';
 }
