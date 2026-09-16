@@ -1,0 +1,144 @@
+{
+  "_note": "Single source of truth for questionnaire content and scoring. The `character` field on each option is SERVER-ONLY and must never be sent to the public client.",
+  "versionNumber": 1,
+  "characters": [
+    { "code": "DAVINCI",   "displayName": "لئوناردو داوینچی", "years": "۱۴۵۲–۱۵۱۹", "frontImage": "davinci_front.webp",   "backImage": "davinci_back.webp",   "tieOrder": 1 },
+    { "code": "LINCOLN",   "displayName": "آبراهام لینکلن",   "years": "۱۸۰۹–۱۸۶۵", "frontImage": "lincoln_front.webp",   "backImage": "lincoln_back.webp",   "tieOrder": 2 },
+    { "code": "CHURCHILL", "displayName": "وینستون چرچیل",    "years": "۱۸۷۴–۱۹۶۵", "frontImage": "churchill_front.webp", "backImage": "churchill_back.webp", "tieOrder": 3 },
+    { "code": "EINSTEIN",  "displayName": "آلبرت اینشتین",    "years": "۱۸۷۹–۱۹۵۵", "frontImage": "einstein_front.webp",  "backImage": "einstein_back.webp",  "tieOrder": 4 },
+    { "code": "EDISON",    "displayName": "توماس ادیسون",     "years": "۱۸۴۷–۱۹۳۱", "frontImage": "edison_front.webp",    "backImage": "edison_back.webp",    "tieOrder": 5 }
+  ],
+  "questions": [
+    {
+      "code": "Q1", "displayOrder": 1, "isTieBreaker": false,
+      "text": "جلسه مهمه، اطلاعات هم نصفه‌نیمه‌ست و ساعت داره می‌ره. تو بیشتر کدوم‌طوری‌ای؟",
+      "options": [
+        { "code": "A", "text": "اول روشن می‌کنم چی واقعاً می‌دونیم و چی فقط حدسه.", "character": "DAVINCI" },
+        { "code": "B", "text": "از یکی دو نفری که معمولاً مخالفن می‌خوام اول حرف بزنن.", "character": "LINCOLN" },
+        { "code": "C", "text": "چند حرکت جلوتر رو می‌بینم؛ اگر خوب شد، اگر بد شد، اگر غافلگیر شدیم.", "character": "CHURCHILL" },
+        { "code": "D", "text": "یه نسخه کوچیک امتحان می‌کنم؛ نتیجه خودش خیلی چیزها رو روشن می‌کنه.", "character": "EDISON" }
+      ]
+    },
+    {
+      "code": "Q2", "displayOrder": 2, "isTieBreaker": false,
+      "text": "یه آدم خیلی معتبر و باتجربه می‌گه: «این کار جواب نمی‌ده.»",
+      "options": [
+        { "code": "A", "text": "اول می‌پرسم آیا این تصمیم با چیزی که درست می‌دونیم هم جور درمیاد یا نه.", "character": "EINSTEIN" },
+        { "code": "B", "text": "می‌گم: ممکنه؛ ولی بذار خودمون هم دوباره نگاهش کنیم.", "character": "DAVINCI" },
+        { "code": "C", "text": "قبل از اینکه اسم و مقامش بقیه رو ساکت کنه، نظر چند نفر دیگه رو هم می‌گیرم.", "character": "LINCOLN" },
+        { "code": "D", "text": "زیاد بحث نمی‌کنم؛ یه راه پیدا می‌کنم که بشه حرفش رو امتحان کرد.", "character": "EDISON" }
+      ]
+    },
+    {
+      "code": "Q3", "displayOrder": 3, "isTieBreaker": false,
+      "text": "وسط بحران، سه خبر متناقض هم‌زمان می‌رسه.",
+      "options": [
+        { "code": "A", "text": "اول چند ثانیه سرعت خودم رو کم می‌کنم؛ بحران نباید سرعت فکر من رو تعیین کنه.", "character": "CHURCHILL" },
+        { "code": "B", "text": "از یکی می‌خوام عمداً با جمع‌بندی غالب مخالفت کنه.", "character": "LINCOLN" },
+        { "code": "C", "text": "جدا می‌کنم: چی واقعاً دیدیم، چی برداشت ماست و چی هنوز معلوم نیست.", "character": "DAVINCI" },
+        { "code": "D", "text": "قبل از هر چیز می‌پرسم: در این شلوغی، چه خط قرمزی نباید گم بشه؟", "character": "EINSTEIN" }
+      ]
+    },
+    {
+      "code": "Q4", "displayOrder": 4, "isTieBreaker": false,
+      "text": "پروژه‌ای که خیلی دوستش داری چند علامت بد نشون داده.",
+      "options": [
+        { "code": "A", "text": "یه نسخه متفاوت می‌سازم و دوباره امتحانش می‌کنم.", "character": "EDISON" },
+        { "code": "B", "text": "دنبال قوی‌ترین شاهدی می‌گردم که ممکنه ثابت کنه ایده خودم غلط بوده.", "character": "DAVINCI" },
+        { "code": "C", "text": "کمی فاصله می‌گیرم و می‌بینم ادامه‌دادنش شش ماه بعد چه هزینه‌ای داره.", "character": "CHURCHILL" },
+        { "code": "D", "text": "می‌پرسم: اگر این پروژه مال من نبود، باز هم همین‌قدر ازش دفاع می‌کردم؟", "character": "EINSTEIN" }
+      ]
+    },
+    {
+      "code": "Q5", "displayOrder": 5, "isTieBreaker": false,
+      "text": "یک تصمیم سود خیلی خوبی داره، ولی ته دلت یه «هوم...» هست.",
+      "options": [
+        { "code": "A", "text": "می‌پرسم: «اگر فردا همه بفهمن این تصمیم رو گرفتم، هنوز ازش دفاع می‌کنم؟»", "character": "EINSTEIN" },
+        { "code": "B", "text": "حرف کسی رو می‌شنوم که احتمالاً بیشترین اثر این تصمیم روی اونه.", "character": "LINCOLN" },
+        { "code": "C", "text": "نمی‌ذارم هیجان سود، آینده تصمیم رو از جلوی چشمم برداره.", "character": "CHURCHILL" },
+        { "code": "D", "text": "داستان قشنگی که برای خودمون ساختیم کنار می‌ذارم و فقط واقعیت‌ها رو نگاه می‌کنم.", "character": "DAVINCI" }
+      ]
+    },
+    {
+      "code": "Q6", "displayOrder": 6, "isTieBreaker": false,
+      "text": "آینده خیلی مبهمه و هیچ گزینه‌ای هم بی‌نقص نیست.",
+      "options": [
+        { "code": "A", "text": "بدترین حالت معقول رو تصور می‌کنم و می‌بینم امروز چه کاری باید متفاوت انجام بدم.", "character": "CHURCHILL" },
+        { "code": "B", "text": "یه قدم عملی و قابل برگشت برمی‌دارم تا از نتیجه‌اش یاد بگیرم.", "character": "EDISON" },
+        { "code": "C", "text": "قبل از تصمیم، صدای کسی رو می‌شنوم که کمترین قدرت رو توی اتاق داره.", "character": "LINCOLN" },
+        { "code": "D", "text": "اول مشخص می‌کنم چه چیزی تحت هیچ شرایطی نباید قربانی این تصمیم بشه.", "character": "EINSTEIN" }
+      ]
+    },
+    {
+      "code": "Q7", "displayOrder": 7, "isTieBreaker": false,
+      "text": "یه همکار جوان میاد و می‌گه: فکر کنم تصمیم شما اشتباهه.",
+      "options": [
+        { "code": "A", "text": "می‌گم: «خوبه؛ کامل بگو کجاش.»", "character": "LINCOLN" },
+        { "code": "B", "text": "می‌پرسم: «چی دیدی که من ندیدم؟»", "character": "DAVINCI" },
+        { "code": "C", "text": "قبل از دفاع از تصمیمم، حواسم هست غرورم وارد ماجرا نشده باشه.", "character": "EINSTEIN" },
+        { "code": "D", "text": "اگر حرفش قابل امتحانه، یه راه سریع برای آزمودنش پیدا می‌کنم.", "character": "EDISON" }
+      ]
+    },
+    {
+      "code": "Q8", "displayOrder": 8, "isTieBreaker": false,
+      "text": "دو ساعت تا تصمیم نهایی مونده و هنوز اطلاعات کامل نیست.",
+      "options": [
+        { "code": "A", "text": "می‌پرسم: «سریع‌ترین راهی که بفهمیم واقعاً چه خبره چیه؟»", "character": "EDISON" },
+        { "code": "B", "text": "چیزهایی که دیدیم رو از چیزهایی که فقط تصور کردیم جدا می‌کنم.", "character": "DAVINCI" },
+        { "code": "C", "text": "می‌پرسم اگر بدترین سناریوی معقول اتفاق بیفته، این تصمیم هنوز قابل دفاعه؟", "character": "CHURCHILL" },
+        { "code": "D", "text": "بررسی می‌کنم آیا برای رسیدن به نتیجه داریم از یک مرز مهم عبور می‌کنیم یا نه.", "character": "EINSTEIN" }
+      ]
+    },
+    {
+      "code": "Q9", "displayOrder": 9, "isTieBreaker": false,
+      "text": "همه اعضای جلسه خیلی سریع روی یک گزینه توافق کردن.",
+      "options": [
+        { "code": "A", "text": "اتفاقاً نگران می‌شم؛ می‌خوام بدونم مخالف واقعی کجاست.", "character": "LINCOLN" },
+        { "code": "B", "text": "مسئله رو از یک زاویه کاملاً متفاوت نگاه می‌کنم.", "character": "DAVINCI" },
+        { "code": "C", "text": "می‌پرسم این توافق امروز، فردا چه هزینه‌ای ممکنه بسازه.", "character": "CHURCHILL" },
+        { "code": "D", "text": "به‌جای ادامه بحث، یک تست واقعی برای فرض مشترکمون طراحی می‌کنم.", "character": "EDISON" }
+      ]
+    },
+    {
+      "code": "Q10", "displayOrder": 10, "isTieBreaker": false,
+      "text": "یکی توی جلسه عصبانی شده و بحث داره از کنترل خارج می‌شه.",
+      "options": [
+        { "code": "A", "text": "اجازه می‌دم حرف مخالف کامل شنیده بشه و دوباره بحث رو برمی‌گردونم سر مسئله.", "character": "LINCOLN" },
+        { "code": "B", "text": "خودم سرعت واکنشم رو کم می‌کنم و دنبال تصمیمی می‌گردم که فردا هم قابل دفاع باشه.", "character": "CHURCHILL" },
+        { "code": "C", "text": "یادآوری می‌کنم حتی زیر فشار، بعضی مرزها قابل جابه‌جایی نیستن.", "character": "EINSTEIN" },
+        { "code": "D", "text": "بحث رو از حرف‌های کلی بیرون می‌آرم و دنبال چیزی می‌گردم که بشه واقعاً امتحانش کرد.", "character": "EDISON" }
+      ]
+    },
+    {
+      "code": "Q11", "displayOrder": 11, "isTieBreaker": false,
+      "text": "تصمیم قبلی‌تون جواب نداده. جلسه مرور دارید.",
+      "options": [
+        { "code": "A", "text": "می‌پرسم: «کجای نگاه ما به واقعیت غلط بود؟»", "character": "DAVINCI" },
+        { "code": "B", "text": "از کسی که اون موقع مخالف بوده می‌خوام دوباره حرفش رو بگه.", "character": "LINCOLN" },
+        { "code": "C", "text": "نتیجه جلسه باید یک تغییر واقعی در روش کار ایجاد کنه؛ وگرنه مرور به چه درد می‌خوره؟", "character": "EDISON" },
+        { "code": "D", "text": "دنبال این نیستم که مقصر پیدا کنم؛ می‌خوام بفهمم کجا از چیزی که درست می‌دونستیم فاصله گرفتیم.", "character": "EINSTEIN" }
+      ]
+    },
+    {
+      "code": "Q12", "displayOrder": 12, "isTieBreaker": false,
+      "text": "پروژه خیلی موفق شده و همه دارن جشن می‌گیرن.",
+      "options": [
+        { "code": "A", "text": "می‌پرسم: «کجاش مهارت ما بود و کجاش شانس؟»", "character": "CHURCHILL" },
+        { "code": "B", "text": "دنبال چیزی می‌گردم که موفقیت ممکنه از چشممون پنهان کرده باشه.", "character": "DAVINCI" },
+        { "code": "C", "text": "حواسم هست موفقیت امروز، ما رو نسبت به ریسک فردا کور نکنه.", "character": "EINSTEIN" },
+        { "code": "D", "text": "از چند نفر می‌پرسم: «اگه قرار بود شکست بخوریم، احتمالاً از کجا می‌خوردیم؟»", "character": "LINCOLN" }
+      ]
+    },
+    {
+      "code": "QT", "displayOrder": 13, "isTieBreaker": true,
+      "text": "وقتی واقعاً مطمئن نیستی، کدوم جمله بیشتر مال توئه؟",
+      "options": [
+        { "code": "A", "text": "«بذار یه جور دیگه نگاهش کنم.»", "character": "DAVINCI" },
+        { "code": "B", "text": "«اول ببینیم چیزی که داریم می‌کنیم واقعاً قابل دفاع هست یا نه.»", "character": "EINSTEIN" },
+        { "code": "C", "text": "«قبل از تصمیم، دوست دارم یک مخالف واقعی رو بشنوم.»", "character": "LINCOLN" },
+        { "code": "D", "text": "«تصمیم امروز رو با هزینه فرداش هم می‌سنجم.»", "character": "CHURCHILL" },
+        { "code": "E", "text": "«بسه حرف؛ یه چیزی بسازیم و امتحان کنیم.»", "character": "EDISON" }
+      ]
+    }
+  ]
+}
