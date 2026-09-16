@@ -15,7 +15,7 @@ import {
   testVersions,
 } from '../../db/schema/index';
 import { ERROR_CODES, notFound } from '../../shared/errors';
-import { normalizeMobile, normalizeNameForLookup } from '../../shared/normalize';
+import { normalizeMobile, normalizeNameForLookup, toAsciiDigits } from '../../shared/normalize';
 import { nowUtc, toIso, toIsoRequired } from '../../shared/time';
 
 export interface AttemptFilters {
@@ -38,17 +38,26 @@ export function buildAttemptFilters(filters: AttemptFilters): SQL | undefined {
 
   const term = filters.q?.trim();
   if (term) {
-    const nameTerm = `%${escapeLike(normalizeNameForLookup(term))}%`;
-    const mobile = normalizeMobile(term);
     // A search term can be a name fragment, any form of a mobile number, or a
     // tracking code; all three are tried.
+    const nameTerm = `%${escapeLike(normalizeNameForLookup(term))}%`;
     const searchClauses: SQL[] = [
       like(participants.normalizedFirstName, nameTerm),
       like(participants.normalizedLastName, nameTerm),
       like(testAttempts.trackingCode, `%${escapeLike(term.toUpperCase())}%`),
-      like(participants.normalizedMobile, `%${escapeLike(term.replace(/\D/g, ''))}%`),
     ];
+
+    // Partial mobile search, but only when the term really is a run of digits.
+    // Tracking codes mix letters and digits, so stripping the letters out of one
+    // would leave a two- or three-digit fragment that matches most of the table.
+    const digits = toAsciiDigits(term).replace(/[\s\-().+]/g, '');
+    if (/^\d{4,}$/.test(digits)) {
+      searchClauses.push(like(participants.normalizedMobile, `%${escapeLike(digits)}%`));
+    }
+
+    const mobile = normalizeMobile(term);
     if (mobile.ok) searchClauses.push(eq(participants.normalizedMobile, mobile.normalized));
+
     clauses.push(or(...searchClauses)!);
   }
 

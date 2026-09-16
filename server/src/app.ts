@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { env } from './config/index';
 import { apiNotFound, errorHandler } from './middleware/errorHandler';
 import { notFound } from './shared/errors';
+import { storage } from './storage/index';
 import { adminRouter } from './modules/admin/routes';
 import { publicRouter } from './modules/attempts/routes';
 import { logger } from './shared/logger';
@@ -28,7 +29,7 @@ export function createApp(): Express {
           // Vite emits a small inline style block; fonts and images are self-hosted.
           styleSrc: ["'self'", "'unsafe-inline'"],
           scriptSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'blob:'],
+          imgSrc: ["'self'", 'data:', 'blob:', ...storage.imageOrigins],
           fontSrc: ["'self'", 'data:'],
           connectSrc: ["'self'"],
           objectSrc: ["'none'"],
@@ -60,6 +61,17 @@ export function createApp(): Express {
 
   // Uploaded media: read-only, no directory listing, no dotfiles, and never
   // interpreted as anything but the stored image.
+  if (storage.kind === 'local') mountUploads(app);
+
+  if (env.SERVE_CLIENT) mountClient(app);
+
+  app.use(errorHandler);
+
+  return app;
+}
+
+/** Only the local driver serves files from this origin. */
+function mountUploads(app: Express): void {
   app.use(
     '/uploads',
     express.static(env.uploadDir, {
@@ -76,12 +88,6 @@ export function createApp(): Express {
   app.use('/uploads', (_req, _res, next) => {
     next(notFound());
   });
-
-  mountClient(app);
-
-  app.use(errorHandler);
-
-  return app;
 }
 
 /**

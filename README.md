@@ -22,6 +22,7 @@ same-origin and there is no CORS layer to maintain.
 - [Development](#development)
 - [Production build](#production-build)
 - [Deploying to a Node host](#deploying-to-a-node-host)
+- [Deploying to Vercel](#deploying-to-vercel)
 - [Backups](#backups)
 - [API reference](#api-reference)
 - [How scoring works](#how-scoring-works)
@@ -45,12 +46,18 @@ same-origin and there is no CORS layer to maintain.
 No Docker, Redis, queue or message bus is required. The app is sized for roughly
 100 concurrent users on a single process.
 
+It deploys either as one long-lived Node process (the design target) or
+serverless on Vercel. See [Deploying to a Node host](#deploying-to-a-node-host)
+and [Deploying to Vercel](#deploying-to-vercel) — the trade-offs of each are
+spelled out there.
+
 ---
 
 ## Repository layout
 
 ```
 .
+├── api/index.ts                Serverless entry point (Vercel); wraps the same app
 ├── client/                     React SPA (participant game + admin panel)
 │   ├── src/
 │   │   ├── components/         Shared UI primitives
@@ -68,7 +75,7 @@ No Docker, Redis, queue or message bus is required. The app is sized for roughly
 │   │   ├── modules/            admin, answers, attempts, auth, exports,
 │   │   │                       media, participants, questionnaire, scoring
 │   │   ├── shared/             Errors, normalization, ids, password, time
-│   │   ├── storage/            Upload storage with path-traversal guards
+│   │   ├── storage/            Pluggable upload storage (local disk / Vercel Blob)
 │   │   ├── app.ts              Express app assembly
 │   │   └── server.ts           Process entry point
 │   └── dist/                   Bundled output (`server/dist/server.js`)
@@ -80,7 +87,8 @@ No Docker, Redis, queue or message bus is required. The app is sized for roughly
 │   ├── seed-content.ts         Idempotent content seeding
 │   └── create-admin.ts         Create or reset an admin account
 ├── seed/seed-content.json      Canonical questionnaire content + scoring map
-└── uploads/                    Uploaded images (gitignored, back this up)
+├── uploads/                    Uploaded images (gitignored, back this up)
+└── vercel.json                 Serverless routing and build configuration
 ```
 
 ---
@@ -250,18 +258,6 @@ endpoint returns a real 404 instead of a blank page.
 
 ## Deploying to a Node host
 
-> **This app needs a long-lived Node process, not a serverless platform.**
-> It holds a MySQL connection pool, rate-limits in process memory, writes
-> uploads to a local directory, and takes a row lock (`SELECT … FOR UPDATE`)
-> across a finalize. On a serverless host the uploads directory is ephemeral,
-> the rate limiter becomes per-instance and ineffective, and a pool per
-> invocation exhausts the database's connection limit.
->
-> Pointing a platform's "output directory" at `client/dist` will build and
-> deploy, but it ships the SPA with no API behind it: every `/api/*` call 404s
-> and nothing works past the entry screen. A VPS or any host that runs
-> `node server/dist/server.js` as a service is the supported target.
-
 1. **Provision** Node 20+, MySQL 8, and a persistent directory for uploads.
 2. **Copy the code** (git clone or an artifact upload) and run `npm ci`.
 3. **Configure** `.env`, with `NODE_ENV=production`, `COOKIE_SECURE=true`,
@@ -332,6 +328,68 @@ run.
 
 ---
 
+## Deploying to Vercel
+
+The app also runs serverless. `api/index.ts` exports the same Express app as a
+request handler, `client/dist` is served by the CDN, and `vercel.json` rewrites
+`/api/*` to the function and everything else to `index.html`.
+
+Two things must change, because a serverless host has no persistent disk and no
+single long-lived process:
+
+| Concern       | Node host                  | Vercel                                      |
+| ------------- | -------------------------- | ------------------------------------------- |
+| Uploads       | `STORAGE_DRIVER=local`     | `STORAGE_DRIVER=blob` (Vercel Blob)         |
+| Static SPA    | served by this process     | served by the CDN (`SERVE_CLIENT=false`)    |
+| Database      | can be on localhost        | **must be reachable from the internet**     |
+
+### Steps
+
+1. **A publicly reachable MySQL 8.** A function cannot see `127.0.0.1`. Use a
+   managed MySQL, or your own server with remote access and TLS. Set `DB_SSL=true`.
+2. **Create a Blob store** on the project (Storage → Blob). Vercel injects
+   `BLOB_READ_WRITE_TOKEN` automatically.
+3. **Set the environment variables** on the project: `DB_HOST`, `DB_PORT`,
+   `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL=true`, `DB_POOL_SIZE=2`,
+   `SESSION_SECRET`, `STORAGE_DRIVER=blob`, `ALLOWED_ORIGINS=https://<your-domain>`.
+   `NODE_ENV`, `COOKIE_SECURE`, `TRUST_PROXY` and `SERVE_CLIENT` are correct by
+   default on Vercel and do not need setting.
+4. **Run the migrations and the seed once, from your own machine**, pointed at
+   that database — there is no shell on Vercel:
+   ```bash
+   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run db:migrate
+   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run seed:content
+   DB_HOST=… DB_USER=… DB_PASSWORD=… DB_NAME=… DB_SSL=true npm run create:admin -- --username admin --display-name "…"
+   ```
+   Repeat `db:migrate` after any deploy that adds a migration.
+5. **Deploy.** Pushing to the connected branch is enough.
+
+### What is weaker on Vercel
+
+These are real trade-offs, not warnings to wave away:
+
+- **Rate limiting is per instance.** `express-rate-limit` keeps its counters in
+  memory, and each warm instance has its own. The configured limits become
+  best-effort. What still holds regardless is enforced by the database: the
+  idempotency key on finalize, the unique constraints on identity and answers,
+  and the `SELECT … FOR UPDATE` row lock. Those are the protections that matter
+  for correctness; the rate limit is only a throttle.
+- **Connections are per instance.** Each warm instance opens its own pool, so
+  `DB_POOL_SIZE` multiplies by the number of instances. Keep it at 1–2 and make
+  sure the database's `max_connections` has headroom, or put a pooler in front.
+- **Cold starts** add roughly a second to the first request after idle.
+- **Uploaded images leave your origin.** They are served from
+  `*.public.blob.vercel-storage.com`, which the CSP allows explicitly. They are
+  public URLs, which is fine for questionnaire images and would not be for
+  anything private.
+- **Back up the Blob store too**, not just the database — the *Backups* section
+  below assumes a local uploads directory.
+
+If none of that is acceptable, the Node-host path above has none of these
+trade-offs and is the configuration the app was designed around.
+
+---
+
 ## Backups
 
 Two things must be backed up together — one without the other leaves questions
@@ -358,6 +416,9 @@ tar czf uploads-$(date +%F).tar.gz -C /srv/azmoonrahbari uploads
 
 A nightly cron that writes both to off-host storage is enough for this workload.
 Verify a restore periodically — an untested backup is a guess.
+
+On `STORAGE_DRIVER=blob` there is no local directory to archive: back up the
+Blob store instead, and keep doing the database dump.
 
 ---
 

@@ -7,20 +7,18 @@ import type {
 import type { OptionRow } from '../../db/schema/options';
 import type { QuestionWithOptions } from './repository';
 
-/** Maps `media_assets.id` to its stored filename, so serializers stay synchronous. */
+/**
+ * Maps `media_assets.id` to the URL it renders at, so serializers stay
+ * synchronous and driver-agnostic — whether the file is served from /uploads or
+ * from object storage is already resolved by the time it gets here.
+ */
 export type MediaMap = ReadonlyMap<number, string>;
 
 export const EMPTY_MEDIA_MAP: MediaMap = new Map<number, string>();
 
-/** Public URL for an uploaded asset; `/uploads` is served read-only by the app. */
-export function mediaUrlFromStoredName(storedName: string): string {
-  return `/uploads/${storedName}`;
-}
-
 function mediaUrl(assetId: number | null, media: MediaMap): string | null {
   if (assetId === null) return null;
-  const storedName = media.get(assetId);
-  return storedName ? mediaUrlFromStoredName(storedName) : null;
+  return media.get(assetId) ?? null;
 }
 
 /**

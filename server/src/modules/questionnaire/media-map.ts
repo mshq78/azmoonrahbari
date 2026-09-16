@@ -2,6 +2,7 @@ import { inArray } from 'drizzle-orm';
 import { db, type DbOrTx } from '../../db/client';
 import { mediaAssets } from '../../db/schema/index';
 import type { QuestionWithOptions } from './repository';
+import { publicUrlFor } from '../../storage/index';
 import { EMPTY_MEDIA_MAP, type MediaMap } from './serializers';
 
 /** Collects every media id referenced by a set of questions and their options. */
@@ -21,11 +22,15 @@ export async function loadMediaMap(ids: number[], conn: DbOrTx = db): Promise<Me
   if (ids.length === 0) return EMPTY_MEDIA_MAP;
 
   const rows = await conn
-    .select({ id: mediaAssets.id, storedName: mediaAssets.storedName })
+    .select({
+      id: mediaAssets.id,
+      storedName: mediaAssets.storedName,
+      publicUrl: mediaAssets.publicUrl,
+    })
     .from(mediaAssets)
     .where(inArray(mediaAssets.id, ids));
 
-  return new Map(rows.map((row) => [row.id, row.storedName]));
+  return new Map(rows.map((row) => [row.id, publicUrlFor(row)]));
 }
 
 export async function loadMediaMapForQuestions(

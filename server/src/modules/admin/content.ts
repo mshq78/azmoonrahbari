@@ -8,7 +8,7 @@ import { nowUtc } from '../../shared/time';
 import { isDuplicateKeyError } from '../participants/service';
 import { loadMediaMap } from '../questionnaire/media-map';
 import { loadQuestionsWithOptions } from '../questionnaire/repository';
-import { mediaUrlFromStoredName, type MediaMap } from '../questionnaire/serializers';
+import { type MediaMap } from '../questionnaire/serializers';
 import { assertMediaAssetExists } from '../media/service';
 import { assertVersionEditable } from './versions';
 
@@ -323,6 +323,5 @@ function toAdminQuestion(
 
 function mediaUrlFor(assetId: number | null, media: MediaMap): string | null {
   if (assetId === null) return null;
-  const storedName = media.get(assetId);
-  return storedName ? mediaUrlFromStoredName(storedName) : null;
+  return media.get(assetId) ?? null;
 }

@@ -11,6 +11,10 @@ export const pool = mysql.createPool({
   database: env.DB_NAME,
   connectionLimit: env.DB_POOL_SIZE,
   waitForConnections: true,
+  // Managed MySQL requires TLS; a local socket does not.
+  ...(env.DB_SSL
+    ? { ssl: { rejectUnauthorized: env.DB_SSL_REJECT_UNAUTHORIZED } }
+    : {}),
   charset: 'utf8mb4',
   // All timestamps are stored and read as UTC; see shared/time.ts.
   timezone: 'Z',

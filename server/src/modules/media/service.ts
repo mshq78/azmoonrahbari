@@ -4,8 +4,7 @@ import { db } from '../../db/client';
 import { mediaAssets, options, questions } from '../../db/schema/index';
 import { conflict, ERROR_CODES, notFound } from '../../shared/errors';
 import { nowUtc, toIsoRequired } from '../../shared/time';
-import { deleteStoredFile, storeImage } from '../../storage/localStorage';
-import { mediaUrlFromStoredName } from '../questionnaire/serializers';
+import { publicUrlFor, storage } from '../../storage/index';
 
 export async function createMediaAsset(input: {
   buffer: Buffer;
@@ -13,13 +12,14 @@ export async function createMediaAsset(input: {
   originalName: string;
   adminId: number;
 }): Promise<AdminMediaAsset> {
-  const stored = await storeImage(input.buffer, input.mimeType, input.originalName);
+  const stored = await storage.store(input.buffer, input.mimeType, input.originalName);
   const now = nowUtc();
 
   try {
     const [inserted] = await db.insert(mediaAssets).values({
       originalName: input.originalName.slice(0, 255),
       storedName: stored.storedName,
+      publicUrl: stored.publicUrl,
       mimeType: stored.mimeType,
       sizeBytes: stored.sizeBytes,
       uploadedByAdminId: input.adminId,
@@ -35,7 +35,7 @@ export async function createMediaAsset(input: {
     return toAdminMediaAsset(row, 0);
   } catch (error) {
     // Do not leave an orphan file behind if the row could not be written.
-    await deleteStoredFile(stored.storedName).catch(() => undefined);
+    await storage.delete(stored).catch(() => undefined);
     throw error;
   }
 }
@@ -79,7 +79,7 @@ export async function deleteMediaAsset(id: number): Promise<{ deleted: boolean }
   }
 
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id));
-  await deleteStoredFile(row.storedName);
+  await storage.delete(row);
   return { deleted: true };
 }
 
@@ -132,7 +132,7 @@ function toAdminMediaAsset(
     storedName: row.storedName,
     mimeType: row.mimeType,
     sizeBytes: row.sizeBytes,
-    url: mediaUrlFromStoredName(row.storedName),
+    url: publicUrlFor(row),
     isActive: row.isActive,
     referenceCount,
     createdAt: toIsoRequired(row.createdAt),

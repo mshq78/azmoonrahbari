@@ -4,12 +4,12 @@ import { env } from './config/index';
 import { closeDb, pool } from './db/client';
 import { purgeStaleAdminSessions } from './modules/auth/service';
 import { logger } from './shared/logger';
-import { ensureUploadDir } from './storage/localStorage';
+import { storage } from './storage/index';
 
 const SESSION_PURGE_INTERVAL_MS = 60 * 60 * 1000;
 
 async function main(): Promise<void> {
-  await ensureUploadDir();
+  await storage.init();
 
   // Fail fast if the database is unreachable, rather than serving 500s.
   const connection = await pool.getConnection();

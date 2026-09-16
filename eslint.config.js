@@ -41,7 +41,7 @@ export default tseslint.config(
 
   // Server, scripts and shared contracts: Node globals, no DOM.
   {
-    files: ['server/**/*.ts', 'scripts/**/*.ts', 'shared/**/*.ts', '*.js', '*.mjs'],
+    files: ['server/**/*.ts', 'scripts/**/*.ts', 'shared/**/*.ts', 'api/**/*.ts', '*.js', '*.mjs'],
     languageOptions: {
       globals: { ...globals.node },
     },

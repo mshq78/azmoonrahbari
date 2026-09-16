@@ -7,6 +7,11 @@ export const mediaAssets = mysqlTable(
     id: int('id').autoincrement().primaryKey(),
     originalName: varchar('original_name', { length: 255 }).notNull(),
     storedName: varchar('stored_name', { length: 191 }).notNull(),
+    /**
+     * Absolute URL for files served from another origin (object storage).
+     * Null means the file is served by this app from /uploads/<storedName>.
+     */
+    publicUrl: varchar('public_url', { length: 512 }),
     mimeType: varchar('mime_type', { length: 64 }).notNull(),
     sizeBytes: int('size_bytes').notNull(),
     width: int('width'),
