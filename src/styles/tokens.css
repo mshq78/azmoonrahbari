@@ -1,0 +1,135 @@
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-Black.woff2') format('woff2');
+}
+
+:root {
+  /* Raw Palette Tokens */
+  --navy-900: #0E2340;
+  --navy-800: #122845;
+  --navy-700: #16304F;
+  --navy-600: #1C3B61;
+  --gold-500: #F2C14E;
+  --gold-600: #DDB042;
+  --gold-700: #C9A227;
+  --cream-50: #FAF4E6;
+  --cream-100: #F3ECE0;
+  --cream-200: #E6DCC9;
+  --ink-900: #17273D;
+  --ink-700: #2A3F5B;
+  --ink-500: #4B5E78;
+
+  /* Semantic Light Theme */
+  --bg-app: var(--cream-50);
+  --surface-app: #FFFFFF;
+  --surface-muted: #F5EFE1;
+  --surface-highlight: #FAF1D8;
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --accent-gold: var(--gold-700);
+  --accent-gold-highlight: var(--gold-500);
+  --border-subtle: #E6DDD0;
+  --border-strong: #CFC2B0;
+  --border-selected: var(--gold-700);
+  --selected-tint: rgba(201, 162, 39, 0.08);
+
+  /* Primary Button (Light: Navy with Cream text) */
+  --btn-primary-bg: var(--ink-900);
+  --btn-primary-hover: #0E2340;
+  --btn-primary-text: var(--cream-50);
+
+  /* Secondary Button */
+  --btn-secondary-bg: #FFFFFF;
+  --btn-secondary-border: var(--border-strong);
+  --btn-secondary-text: var(--ink-900);
+  --btn-secondary-hover: #F6F0E4;
+
+  /* Engraved border styling */
+  --card-shadow: 0 4px 18px rgba(14, 35, 64, 0.06);
+  --gold-edge: 0 0 0 1px rgba(201, 162, 39, 0.35);
+}
+
+.dark, [data-theme="dark"] {
+  /* Semantic Dark Theme */
+  --bg-app: var(--navy-900);
+  --surface-app: var(--navy-700);
+  --surface-muted: #122844;
+  --surface-highlight: #1A395E;
+  --text-primary: var(--cream-50);
+  --text-secondary: #E4DAC4;
+  --text-muted: #B8C7D9;
+  --accent-gold: var(--gold-500);
+  --accent-gold-highlight: #F5CD68;
+  --border-subtle: #1F3D64;
+  --border-strong: #2B4E7C;
+  --border-selected: var(--gold-500);
+  --selected-tint: rgba(242, 193, 78, 0.12);
+
+  /* Primary Button (Dark: Gold with Navy text) */
+  --btn-primary-bg: var(--gold-500);
+  --btn-primary-hover: #E3B23E;
+  --btn-primary-text: var(--navy-900);
+
+  /* Secondary Button */
+  --btn-secondary-bg: var(--navy-700);
+  --btn-secondary-border: var(--border-strong);
+  --btn-secondary-text: var(--cream-50);
+  --btn-secondary-hover: #1E3D63;
+
+  /* Engraved border styling */
+  --card-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --gold-edge: 0 0 0 1px rgba(242, 193, 78, 0.4);
+}
+
+body {
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-size: 18px;
+  line-height: 1.65;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Constrain line lengths for reading comfort (under ~60 characters) */
+.prose-persian {
+  max-width: 58ch;
+}
+
+/* Accessible focus outline */
+*:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
