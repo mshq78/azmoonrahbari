@@ -5,10 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>وقت تصمیم، شبیه کدومی؟ — رهبری هوشیار</title>
     <meta name="description" content="بازی ۱۲ موقعیتی سبک تصمیم‌گیری مدیران و مقایسه با ۵ شخصیت تاریخی — رهبری هوشیار" />
+
+    <!--
+      Applies the stored theme before the first paint, so a dark-mode visitor
+      never sees a white flash. The app's own theme module (src/state/theme.ts)
+      owns the same key and the same class/attribute pair; the two must agree.
+
+      This script is inline on purpose — a separate file would cost a
+      render-blocking round trip, which is the very thing being avoided. The
+      server's CSP therefore allows it by hash: if this block is edited, the
+      sha256 in server/src/app.ts must be regenerated or the browser will
+      silently refuse to run it in production.
+    -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme-preference');
+          var theme =
+            saved === 'dark' || saved === 'light'
+              ? saved
+              : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          /* Blocked storage: fall through to the default light theme. */
+        }
+      })();
+    </script>
+
+    <!-- Favicon and mobile touch icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0E2340" />
+
+    <!--
+      Social previews. Telegram, WhatsApp and X want an absolute URL here, so
+      the origin comes from VITE_PUBLIC_ORIGIN at build time (see .env.example).
+      Left unset, the tags fall back to a relative path, which most — not all —
+      scrapers still resolve.
+    -->
     <meta property="og:title" content="وقت تصمیم، شبیه کدومی؟ — رهبری هوشیار" />
     <meta property="og:description" content="بازی ۱۲ موقعیتی سبک تصمیم‌گیری مدیران و مقایسه با ۵ شخصیت تاریخی — رهبری هوشیار" />
+    <meta property="og:image" content="%VITE_PUBLIC_ORIGIN%/og-image.png" />
+    <meta property="og:url" content="%VITE_PUBLIC_ORIGIN%/" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fa_IR" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="وقت تصمیم، شبیه کدومی؟ — رهبری هوشیار" />
+    <meta name="twitter:description" content="بازی ۱۲ موقعیتی سبک تصمیم‌گیری مدیران و مقایسه با ۵ شخصیت تاریخی — رهبری هوشیار" />
+    <meta name="twitter:image" content="%VITE_PUBLIC_ORIGIN%/og-image.png" />
+
     <link rel="preload" href="/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/Vazirmatn-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
   </head>
@@ -17,4 +66,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

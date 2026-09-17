@@ -26,6 +26,8 @@ same-origin and there is no CORS layer to maintain.
 - [Backups](#backups)
 - [API reference](#api-reference)
 - [Result card artwork](#result-card-artwork)
+- [Sharing, icons and the theme script](#sharing-icons-and-the-theme-script)
+- [Downloading and sharing the result card](#downloading-and-sharing-the-result-card)
 - [How scoring works](#how-scoring-works)
 - [Security notes](#security-notes)
 - [Operational notes](#operational-notes)
@@ -497,6 +499,55 @@ over it. Two things follow from that.
 
 If an image is missing, `CardFlip` falls back to a typographic card built from
 `characters.fa.ts`, so a failed upload degrades instead of breaking the screen.
+
+---
+
+## Sharing, icons and the theme script
+
+`client/index.html` carries three things that are easy to break from a distance.
+
+**The inline theme script.** It reads `theme-preference` and sets the `dark`
+class before the first paint, so a dark-mode visitor never sees a white flash.
+It has to be inline — a separate file would cost a render-blocking round trip,
+which is the thing being avoided — and `script-src 'self'` would otherwise block
+it. The server therefore allows it *by hash*, and derives that hash at startup by
+reading the inline scripts out of the built `index.html` (`inlineScriptHashes` in
+`server/src/app.ts`). Nothing to keep in sync by hand; edit the script freely.
+`src/state/theme.ts` owns the same storage key and the same class/attribute pair,
+and the two must keep agreeing.
+
+**Open Graph tags.** Telegram and WhatsApp want an absolute `og:image`. The
+origin is substituted at build time from `VITE_PUBLIC_ORIGIN`:
+
+```bash
+VITE_PUBLIC_ORIGIN=https://example.com npm run build
+```
+
+Unset, the tags degrade to relative paths rather than shipping a literal
+placeholder. Set it on the host that builds for production.
+
+**Icons.** `favicon.svg`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
+and `og-image.png` live in `client/public/` and are referenced from
+`manifest.webmanifest`, which makes the game installable on a phone.
+
+---
+
+## Downloading and sharing the result card
+
+The result screen renders the card the participant is looking at to a PNG in the
+browser (`features/result/cardImage.ts`, on `html-to-image`), then either hands
+it to the native share sheet or downloads it.
+
+The card is a CSS 3D flip — two absolutely-positioned faces, the back one held
+at `rotateY(180deg)`. Captured as they sit, the back face exports mirrored and
+the hidden one exports blank, so the clone is flattened first: no transform,
+normal flow, forced visible. `CardFlip` exposes `CARD_ELEMENT_IDS` and a
+`data-flipped` attribute for this, and owns those ids itself so a rename cannot
+leave the exporter grabbing nothing.
+
+Sharing prefers `navigator.share` **with the image file**, which is what makes it
+worth doing on a phone; it falls back to sharing text, and then to the clipboard.
+A dismissed share sheet is a choice, not an error, and is not reported as one.
 
 ---
 

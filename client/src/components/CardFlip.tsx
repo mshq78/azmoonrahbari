@@ -7,6 +7,20 @@ export interface CardFlipProps {
   character: CharacterCardData;
 }
 
+/**
+ * Handles for the one thing outside this component that needs to reach into it:
+ * rendering the visible face to a PNG on the result screen.
+ *
+ * They live here, next to the markup that carries them, so a rename cannot
+ * leave the exporter silently grabbing nothing. Only one card is ever on screen
+ * at a time, which is what makes plain ids safe.
+ */
+export const CARD_ELEMENT_IDS = {
+  card: 'result-card',
+  front: 'result-card-front',
+  back: 'result-card-back',
+} as const;
+
 export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [frontImgError, setFrontImgError] = useState(false);
@@ -29,6 +43,8 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
           `public/cards` (1000x1333), so `object-cover` never crops the text
           baked into those images. */}
       <div
+        id={CARD_ELEMENT_IDS.card}
+        data-flipped={isFlipped}
         className="w-full max-w-[360px] sm:max-w-[400px] aspect-[3/4] relative cursor-pointer select-none group"
         style={{ perspective: '1200px' }}
         role="button"
@@ -47,6 +63,7 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
         >
           {/* Card Front */}
           <div
+            id={CARD_ELEMENT_IDS.front}
             className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border-2 border-[var(--accent-gold)] bg-[var(--navy-900)] text-[var(--cream-50)] shadow-lg"
             style={{
               backfaceVisibility: 'hidden',
@@ -103,6 +120,7 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
 
           {/* Card Back */}
           <div
+            id={CARD_ELEMENT_IDS.back}
             className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border-2 border-[var(--accent-gold)] bg-[var(--navy-700)] text-[var(--cream-50)] shadow-lg"
             style={{
               backfaceVisibility: 'hidden',

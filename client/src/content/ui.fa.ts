@@ -86,7 +86,14 @@ export const uiContent = {
     cardTextHeading: 'متن کارت',
     cardIntroHeading: 'معرفی',
     cardTraitsHeading: 'ویژگی‌های اصلی',
-    downloadCard: 'دانلود تصویر کارت',
+    downloadCard: 'دانلود کارت',
+    shareButton: 'اشتراک‌گذاری',
+    preparingImage: 'در حال آماده‌سازی…',
+    shareText: (characterName: string) =>
+      `نتیجه من در بازی «وقت تصمیم، شبیه کدومی؟»: ${characterName} — تو هم امتحان کن:`,
+    shareCopied: 'کپی شد',
+    imageError: 'آماده‌سازی تصویر کارت انجام نشد. دوباره تلاش کن.',
+    downloadFileName: 'karte-man.png',
     copyLink: 'کپی لینک',
     linkCopied: 'لینک کپی شد',
     trackingPrefix: 'کد رهگیری تو:',
@@ -104,5 +111,10 @@ export const uiContent = {
   footer: {
     intro: 'تجربهٔ یادگیری و خودشناسی رهبری سازمانی',
     entry: 'حفظ حریم خصوصی و امانت‌داری داده‌های سازمانی',
+  },
+  errorBoundary: {
+    title: 'یه مشکلی پیش اومد',
+    description: 'صفحه رو دوباره باز کن؛ جواب‌هایی که دادی ذخیره شدن.',
+    retryButton: 'تلاش دوباره',
   },
 };

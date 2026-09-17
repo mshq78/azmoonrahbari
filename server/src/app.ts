@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
@@ -10,6 +11,37 @@ import { storage } from './storage/index';
 import { adminRouter } from './modules/admin/routes';
 import { publicRouter } from './modules/attempts/routes';
 import { logger } from './shared/logger';
+
+/**
+ * sha256 hashes of every inline `<script>` in the built index.html, in the form
+ * the CSP wants them.
+ *
+ * The page runs one inline script before anything else — it applies the stored
+ * theme so a dark-mode visitor never sees a white flash — and `script-src
+ * 'self'` alone would block it. Hashing whatever is actually in the file, at
+ * startup, means the allowance cannot drift out of sync with the markup the way
+ * a hash pasted into this file would, and it covers anything the bundler
+ * inlines of its own accord too.
+ */
+function inlineScriptHashes(distDir: string): string[] {
+  const indexFile = path.join(distDir, 'index.html');
+  if (!existsSync(indexFile)) return [];
+
+  let html: string;
+  try {
+    html = readFileSync(indexFile, 'utf8');
+  } catch {
+    return [];
+  }
+
+  const hashes: string[] = [];
+  // Only scripts with a body; a `src=` script is already covered by 'self'.
+  for (const [, body] of html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi)) {
+    if (body.trim().length === 0) continue;
+    hashes.push(`'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`);
+  }
+  return hashes;
+}
 
 export function createApp(): Express {
   const app = express();
@@ -28,7 +60,7 @@ export function createApp(): Express {
           defaultSrc: ["'self'"],
           // Vite emits a small inline style block; fonts and images are self-hosted.
           styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
+          scriptSrc: ["'self'", ...(env.SERVE_CLIENT ? inlineScriptHashes(env.clientDistDir) : [])],
           imgSrc: ["'self'", 'data:', 'blob:', ...storage.imageOrigins],
           fontSrc: ["'self'", 'data:'],
           connectSrc: ["'self'"],

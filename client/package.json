@@ -12,6 +12,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.62.11",
     "dexie": "^4.0.10",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^0.546.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

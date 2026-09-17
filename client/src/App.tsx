@@ -11,6 +11,7 @@ import { ReviewScreen } from './features/review/ReviewScreen';
 import { TiebreakScreen } from './features/tiebreak/TiebreakScreen';
 import { RequireAttempt } from './features/attempt/AttemptContext';
 import { OfflineBanner } from './features/states/StateViews';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { adminRoutes } from './features/admin/routes';
 import { applyTheme, resolveInitialTheme } from './state/theme';
 
@@ -50,7 +51,9 @@ function useOnlineStatus(): boolean {
 export default function App() {
   const online = useOnlineStatus();
 
-  // Apply the stored theme before the first paint of any screen.
+  // index.html already applied the theme before the first paint. Repeating it
+  // here costs nothing and keeps the page correct if that inline script was
+  // blocked — by a CSP mismatch, or an extension.
   useEffect(() => {
     applyTheme(resolveInitialTheme());
   }, []);
@@ -59,24 +62,28 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         {!online && <OfflineBanner />}
-        <Routes>
-          <Route path="/" element={<IntroScreen />} />
-          <Route path="/start" element={<EntryScreen />} />
+        {/* A render-time crash below here shows a recoverable screen rather
+            than a blank page; answers live in Dexie, so a reload resumes. */}
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<IntroScreen />} />
+            <Route path="/start" element={<EntryScreen />} />
 
-          {/* Everything below needs a live participant session. */}
-          <Route element={<RequireAttempt />}>
-            <Route path="/q/:index" element={<QuestionScreen />} />
-            <Route path="/review" element={<ReviewScreen />} />
-            <Route path="/tiebreak" element={<TiebreakScreen />} />
-            <Route path="/reveal" element={<RevealScreen />} />
-            <Route path="/result" element={<ResultScreen />} />
-            <Route path="/already" element={<AlreadyScreen />} />
-          </Route>
+            {/* Everything below needs a live participant session. */}
+            <Route element={<RequireAttempt />}>
+              <Route path="/q/:index" element={<QuestionScreen />} />
+              <Route path="/review" element={<ReviewScreen />} />
+              <Route path="/tiebreak" element={<TiebreakScreen />} />
+              <Route path="/reveal" element={<RevealScreen />} />
+              <Route path="/result" element={<ResultScreen />} />
+              <Route path="/already" element={<AlreadyScreen />} />
+            </Route>
 
-          {adminRoutes}
+            {adminRoutes}
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
       </BrowserRouter>
     </QueryClientProvider>
   );

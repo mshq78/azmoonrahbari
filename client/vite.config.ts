@@ -2,13 +2,34 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 
+/**
+ * Fills `%VITE_PUBLIC_ORIGIN%` in index.html with the deployed origin, so the
+ * Open Graph tags carry absolute URLs — Telegram and WhatsApp do not reliably
+ * resolve relative ones.
+ *
+ * Vite's own `%VAR%` substitution leaves the placeholder verbatim when the
+ * variable is unset, which would ship a literal `%VITE_PUBLIC_ORIGIN%` into the
+ * markup. This always substitutes: unset means an empty prefix, which degrades
+ * to the relative path rather than to nonsense.
+ */
+function publicOrigin(): Plugin {
+  const origin = (process.env.VITE_PUBLIC_ORIGIN ?? '').replace(/\/+$/, '');
+  return {
+    name: 'azmoonrahbari:public-origin',
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html) => html.replaceAll('%VITE_PUBLIC_ORIGIN%', origin),
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), publicOrigin()],
   resolve: {
     alias: {
       '@': path.resolve(here, 'src'),
