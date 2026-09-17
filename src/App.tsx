@@ -11,6 +11,7 @@ import { ResultScreen } from './features/result/ResultScreen';
 import { AlreadyScreen } from './features/already/AlreadyScreen';
 import { OfflineBanner } from './features/states/StateViews';
 import { DevToolbar } from './components/DevToolbar';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -32,17 +33,19 @@ export default function App() {
     <QuizProvider>
       <BrowserRouter>
         {isOffline && <OfflineBanner />}
-        <Routes>
-          <Route path="/" element={<IntroScreen />} />
-          <Route path="/start" element={<EntryScreen />} />
-          <Route path="/q/:index" element={<QuestionScreen />} />
-          <Route path="/review" element={<ReviewScreen />} />
-          <Route path="/tiebreak" element={<TiebreakScreen />} />
-          <Route path="/reveal" element={<RevealScreen />} />
-          <Route path="/result" element={<ResultScreen />} />
-          <Route path="/already" element={<AlreadyScreen />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<IntroScreen />} />
+            <Route path="/start" element={<EntryScreen />} />
+            <Route path="/q/:index" element={<QuestionScreen />} />
+            <Route path="/review" element={<ReviewScreen />} />
+            <Route path="/tiebreak" element={<TiebreakScreen />} />
+            <Route path="/reveal" element={<RevealScreen />} />
+            <Route path="/result" element={<ResultScreen />} />
+            <Route path="/already" element={<AlreadyScreen />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
 
         {/* Development & testing preview toolbar */}
         <DevToolbar />

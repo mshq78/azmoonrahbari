@@ -74,7 +74,14 @@ export const uiContent = {
   result: {
     flipHint: 'برگردوندن کارت',
     cardTextHeading: 'متن کارت',
-    downloadCard: 'دانلود تصویر کارت',
+    downloadCard: 'دانلود کارت',
+    shareButton: 'اشتراک‌گذاری',
+    preparingImage: 'در حال آماده‌سازی…',
+    shareText: (characterName: string) =>
+      `نتیجه من در بازی «وقت تصمیم، شبیه کدومی؟»: ${characterName} — تو هم امتحان کن:`,
+    copiedConfirmation: 'کپی شد',
+    imageGenError: 'خطایی در آماده‌سازی تصویر کارت رخ داد. لطفاً دوباره تلاش کنید.',
+    downloadFileName: 'karte-man.png',
     copyLink: 'کپی لینک',
     linkCopied: 'لینک کپی شد',
     trackingPrefix: 'کد رهگیری تو:',
@@ -98,5 +105,10 @@ export const uiContent = {
       unavailable: 'غیرفعال',
     },
     close: 'بستن',
+  },
+  errorBoundary: {
+    title: 'یه مشکلی پیش اومد',
+    description: 'صفحه رو دوباره باز کن؛ جوابهایی که دادی ذخیره شدن.',
+    retryButton: 'تلاش دوباره',
   },
 };
