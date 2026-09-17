@@ -100,14 +100,7 @@ class AttemptStore {
       return;
     }
 
-    const existing = await db.attempts.get(attemptKey);
-
-    // A new completion cycle (an admin reopened the attempt) invalidates the
-    // finalize key, so the next finalize is a fresh operation.
-    const cycleChanged =
-      existing !== undefined && existing.completionCycle !== bootstrap.attempt.completionCycle;
-
-    const record: CachedAttempt = {
+    const content = {
       attemptKey,
       attemptPublicId: bootstrap.attempt.publicId,
       testVersionId: bootstrap.attempt.testVersionId,
@@ -116,10 +109,28 @@ class AttemptStore {
       questions: bootstrap.content.questions,
       tieBreak: bootstrap.tieBreak,
       completionCycle: bootstrap.attempt.completionCycle,
-      finalizeIdempotencyKey: cycleChanged ? null : (existing?.finalizeIdempotencyKey ?? null),
       updatedAt: Date.now(),
     };
-    await db.attempts.put(record);
+
+    // Read and write in one transaction. A bootstrap can land while a finalize
+    // is still settling — `setQueryData` re-runs this from the mutation's own
+    // success handler — and a plain read-then-write would let this stale copy
+    // of `finalizeIdempotencyKey` overwrite the reset that handler just did.
+    // The next finalize would then reuse a spent key with a new payload, which
+    // the server correctly rejects as a conflict.
+    await db.transaction('rw', db.attempts, async () => {
+      const existing = await db.attempts.get(attemptKey);
+
+      // A new completion cycle (an admin reopened the attempt) invalidates the
+      // finalize key, so the next finalize is a fresh operation.
+      const cycleChanged =
+        existing !== undefined && existing.completionCycle !== bootstrap.attempt.completionCycle;
+
+      await db.attempts.put({
+        ...content,
+        finalizeIdempotencyKey: cycleChanged ? null : (existing?.finalizeIdempotencyKey ?? null),
+      });
+    });
 
     // `contentHash` guards against a stale or corrupt cache: the record written
     // above always carries the server's current content, and any cached answer

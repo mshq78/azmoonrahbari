@@ -2,7 +2,8 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BootstrapResponse, FinalizeResponse } from '@shared/types/public-api';
 import { fetchBootstrap, fetchConfig, finalize, startOrResume } from '@/services/api';
-import { type ApiError } from '@/services/http';
+import { ApiError } from '@/services/http';
+import { ERROR_CODES } from '@shared/contracts/errors';
 import { attemptStore, type AttemptSnapshot } from './attemptStore';
 
 export const queryKeys = {
@@ -67,8 +68,21 @@ export function useFinalize() {
       // matches what the participant last saw.
       await attemptStore.flush();
       const answers = await attemptStore.finalizePayload();
-      const idempotencyKey = await attemptStore.takeFinalizeKey();
-      return finalize({ answers, idempotencyKey });
+
+      try {
+        return await finalize({ answers, idempotencyKey: await attemptStore.takeFinalizeKey() });
+      } catch (error) {
+        // A conflict means the stored key already stands for a *different*
+        // finalize — a tie-break round that ended, most often. The operation in
+        // hand is a new one, so it deserves a new key rather than a dead end.
+        // Safe to repeat: finalize runs behind a row lock and simply returns
+        // the stored result if the attempt is already complete.
+        if (!(error instanceof ApiError) || error.code !== ERROR_CODES.IDEMPOTENCY_CONFLICT) {
+          throw error;
+        }
+        await attemptStore.resetFinalizeKey();
+        return await finalize({ answers, idempotencyKey: await attemptStore.takeFinalizeKey() });
+      }
     },
     onSuccess: async (result) => {
       // Apply the outcome to the cached bootstrap straight away. The server has
