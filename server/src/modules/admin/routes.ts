@@ -283,7 +283,6 @@ adminRouter.get(
           q: query.q,
           status: query.status,
           versionId: query.versionId,
-          orgCode: query.orgCode,
         },
         query.page,
         query.pageSize,

@@ -7,9 +7,15 @@ export interface OptionRowProps {
   selected: boolean;
   disabled?: boolean;
   imageUrl?: string | null;
+  /** Position in its group, used to stagger the entrance animation. */
+  staggerIndex?: number;
   onSelect: () => void;
 }
 
+/**
+ * One answer. The whole row is the target — a 12-word Persian sentence is far
+ * easier to hit on a phone than the radio dot beside it.
+ */
 export const OptionRow: React.FC<OptionRowProps> = ({
   id,
   code,
@@ -17,6 +23,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
   selected,
   disabled = false,
   imageUrl,
+  staggerIndex,
   onSelect,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -37,27 +44,41 @@ export const OptionRow: React.FC<OptionRowProps> = ({
       id={`option-${id}`}
       onClick={() => !disabled && onSelect()}
       onKeyDown={handleKeyDown}
-      className={`group relative flex items-start gap-3.5 p-4 md:p-5 rounded-xl transition-all duration-150 cursor-pointer select-none text-right w-full min-h-[58px] border-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)] ${
-        selected
-          ? 'border-[var(--border-selected)] bg-[var(--selected-tint)] shadow-sm'
-          : 'border-[var(--border-subtle)] bg-[var(--surface-app)] hover:border-[var(--border-strong)]'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      {/* Circular marker on the right (RTL leading edge) */}
-      <div
-        className={`shrink-0 w-6 h-6 mt-0.5 rounded-full flex items-center justify-center border-2 transition-all ${
+      style={
+        staggerIndex === undefined
+          ? undefined
+          : ({ '--stagger-index': staggerIndex } as React.CSSProperties)
+      }
+      className={`group relative flex items-start gap-3.5 w-full min-h-[60px] p-4 sm:p-[18px] text-right cursor-pointer select-none rounded-[var(--radius-md)] border
+        transition-[border-color,background-color,box-shadow,transform] duration-200 ease-[var(--ease-out)]
+        active:scale-[0.995] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)]
+        ${staggerIndex === undefined ? '' : 'option-enter'}
+        ${
           selected
-            ? 'border-[var(--accent-gold)] bg-[var(--surface-app)]'
-            : 'border-[var(--border-strong)] bg-transparent group-hover:border-[var(--accent-gold)]'
+            ? 'border-[var(--accent-gold)] bg-[var(--selected-tint)] shadow-[var(--shadow-sm)]'
+            : 'border-[var(--border-subtle)] bg-[var(--surface-app)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)]'
+        }
+        ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+    >
+      {/* Marker on the right — the leading edge in a right-to-left layout. */}
+      <span
+        className={`shrink-0 grid place-items-center w-[22px] h-[22px] mt-[3px] rounded-full border-2 transition-colors duration-200 ${
+          selected
+            ? 'border-[var(--accent-gold)]'
+            : 'border-[var(--border-strong)] group-hover:border-[var(--accent-gold)]'
         }`}
         aria-hidden="true"
       >
-        {selected && <span className="w-3 h-3 rounded-full bg-[var(--accent-gold)]" />}
-      </div>
-
-      <div className="flex-1 min-w-0">
         <span
-          className={`text-[17px] md:text-[18px] leading-relaxed block text-[var(--text-primary)] ${
+          className={`w-[10px] h-[10px] rounded-full bg-[var(--accent-gold)] transition-transform duration-200 ease-[var(--ease-out)] ${
+            selected ? 'scale-100' : 'scale-0'
+          }`}
+        />
+      </span>
+
+      <span className="flex-1 min-w-0">
+        <span
+          className={`block text-[17px] sm:text-[18px] leading-[1.75] text-[var(--text-primary)] transition-[font-weight] ${
             selected ? 'font-semibold' : 'font-normal'
           }`}
         >
@@ -67,10 +88,10 @@ export const OptionRow: React.FC<OptionRowProps> = ({
           <img
             src={imageUrl}
             alt=""
-            className="mt-3 max-h-40 rounded-lg border border-[var(--border-subtle)]"
+            className="mt-3 max-h-40 rounded-[var(--radius-sm)] border border-[var(--border-subtle)]"
           />
         )}
-      </div>
+      </span>
     </div>
   );
 };

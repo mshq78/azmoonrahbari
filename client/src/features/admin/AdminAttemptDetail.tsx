@@ -43,7 +43,7 @@ export const AdminAttemptDetail: React.FC = () => {
   if (detail.isError) return <InlineError message={detail.error.message} />;
 
   const { attempt, answers, resultScores, tiedCharacters } = detail.data;
-  const fullName = `${attempt.firstName} ${attempt.lastName}`;
+  const fullName = attempt.fullName;
 
   return (
     <div className="space-y-4">
@@ -61,10 +61,6 @@ export const AdminAttemptDetail: React.FC = () => {
         <dl className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 text-sm">
           <Field label={adminContent.participants.columns.name} value={fullName} />
           <Field label={adminContent.participants.columns.mobile} value={attempt.mobile} ltr />
-          <Field
-            label={adminContent.participants.columns.orgCode}
-            value={attempt.orgCode ?? adminContent.common.none}
-          />
           <Field
             label={adminContent.participants.columns.status}
             value={adminContent.status[attempt.status]}

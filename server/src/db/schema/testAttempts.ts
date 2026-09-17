@@ -32,7 +32,6 @@ export const testAttempts = pgTable(
     testVersionId: integer('test_version_id')
       .notNull()
       .references(() => testVersions.id),
-    orgCode: varchar('org_code', { length: 64 }),
     status: attemptStatus('status').notNull().default('NotStarted'),
     trackingCode: varchar('tracking_code', { length: 16 }),
     startedAt: timestamp('started_at', { withTimezone: true }),
@@ -54,7 +53,6 @@ export const testAttempts = pgTable(
     trackingCodeUnique: uniqueIndex('uq_test_attempts_tracking_code').on(t.trackingCode),
     statusIdx: index('ix_test_attempts_status').on(t.status),
     versionIdx: index('ix_test_attempts_version').on(t.testVersionId),
-    orgCodeIdx: index('ix_test_attempts_org_code').on(t.orgCode),
     resultIdx: index('ix_test_attempts_result').on(t.resultCharacterCode),
   }),
 );

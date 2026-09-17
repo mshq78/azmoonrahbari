@@ -24,7 +24,6 @@ export const participantsQuerySchema = paginationSchema.extend({
   q: z.string().max(120).optional(),
   status: z.enum(ATTEMPT_STATUSES).optional(),
   versionId: z.coerce.number().int().positive().optional(),
-  orgCode: z.string().max(64).optional(),
 });
 
 export const createQuestionSchema = z.object({
@@ -79,7 +78,6 @@ export const attachImageSchema = z.object({
 export const exportQuerySchema = z.object({
   status: z.enum(ATTEMPT_STATUSES).optional(),
   versionId: z.coerce.number().int().positive().optional(),
-  orgCode: z.string().max(64).optional(),
 });
 
 export const mediaQuerySchema = paginationSchema;

@@ -8,6 +8,13 @@
       "when": 1789601949007,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789643158671,
+      "tag": "0001_single_name_drop_org_code",
+      "breakpoints": true
     }
   ]
 }

@@ -98,7 +98,7 @@ export const AdminDashboard: React.FC = () => {
               {data.latestAttempts.map((attempt) => (
                 <tr key={attempt.id}>
                   <Td>
-                    {attempt.firstName} {attempt.lastName}
+                    {attempt.fullName}
                   </Td>
                   <Td>
                     <Badge tone={attempt.status === 'Completed' ? 'gold' : 'neutral'}>

@@ -45,10 +45,8 @@ export interface AttemptSummary {
 }
 
 export interface ParticipantSummary {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobile: string;
-  orgCode: string | null;
 }
 
 export interface AttemptResult {
@@ -77,10 +75,8 @@ export interface PublicConfigResponse {
 }
 
 export interface StartOrResumeRequest {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobile: string;
-  orgCode?: string;
 }
 
 export interface SaveAnswerRequest {

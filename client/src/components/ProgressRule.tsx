@@ -15,14 +15,11 @@ export const ProgressRule: React.FC<ProgressRuleProps> = ({
   const percentage = Math.min(100, Math.max(0, (current / total) * 100));
 
   return (
-    <header className="sticky top-0 z-20 bg-[var(--bg-app)]/95 backdrop-blur-sm pt-2 pb-3 border-b border-[var(--border-subtle)]/50 transition-colors">
+    <header className="sticky top-0 z-20 bg-[var(--bg-app)]/80 backdrop-blur-md pt-3 pb-3.5 transition-colors">
       <div className="max-w-xl mx-auto px-4 sm:px-6">
         {/* Top line with label and subtle sync indicator */}
-        <div className="flex items-center justify-between text-sm mb-2 select-none">
-          <span
-            className="font-semibold text-[var(--text-secondary)] tracking-wide"
-            aria-live="polite"
-          >
+        <div className="flex items-center justify-between text-[13px] mb-2.5 select-none">
+          <span className="font-medium text-[var(--text-muted)] tracking-wide" aria-live="polite">
             {uiContent.questionnaire.progressLabel(current, total)}
           </span>
 
@@ -53,10 +50,10 @@ export const ProgressRule: React.FC<ProgressRuleProps> = ({
           aria-valuemin={1}
           aria-valuemax={total}
           aria-valuetext={uiContent.questionnaire.progressLabel(current, total)}
-          className="w-full h-[3px] bg-[var(--border-subtle)] overflow-hidden"
+          className="w-full h-[3px] rounded-full bg-[var(--border-subtle)] overflow-hidden"
         >
           <div
-            className="h-full bg-[var(--accent-gold)] transition-all duration-300 ease-out"
+            className="h-full rounded-full bg-[var(--accent-gold)] transition-[width] duration-[var(--dur-slow)] ease-[var(--ease-out)]"
             style={{ width: `${percentage}%` }}
           />
         </div>

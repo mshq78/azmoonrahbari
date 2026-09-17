@@ -11,31 +11,28 @@ import {
 import { nowUtc } from '../../shared/time';
 
 export interface NormalizedIdentity {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobileOriginal: string;
-  normalizedFirstName: string;
-  normalizedLastName: string;
+  normalizedFullName: string;
   normalizedMobile: string;
 }
 
+/** A name has to be more than a single letter to be a name at all. */
+const MIN_NAME_LENGTH = 2;
+const MAX_NAME_LENGTH = 240;
+
 /**
- * Turns raw form input into the identity the database keys on. Display values
- * keep the participant's own spelling; only the normalized triple is ever used
- * for lookup or uniqueness.
+ * Turns raw form input into the identity the database keys on. The display
+ * value keeps the participant's own spelling; only the normalized pair is ever
+ * used for lookup or uniqueness.
  */
 export function normalizeIdentity(input: {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobile: string;
 }): NormalizedIdentity {
-  const firstName = normalizeNameForDisplay(input.firstName);
-  const lastName = normalizeNameForDisplay(input.lastName);
+  const fullName = normalizeNameForDisplay(input.fullName);
 
-  if (firstName.length === 0 || lastName.length === 0) {
-    throw badRequest(ERROR_CODES.INVALID_NAME);
-  }
-  if (firstName.length > 120 || lastName.length > 120) {
+  if (fullName.length < MIN_NAME_LENGTH || fullName.length > MAX_NAME_LENGTH) {
     throw badRequest(ERROR_CODES.INVALID_NAME);
   }
 
@@ -45,11 +42,9 @@ export function normalizeIdentity(input: {
   }
 
   return {
-    firstName,
-    lastName,
+    fullName,
     mobileOriginal: cleanMobileForDisplay(input.mobile),
-    normalizedFirstName: normalizeNameForLookup(firstName),
-    normalizedLastName: normalizeNameForLookup(lastName),
+    normalizedFullName: normalizeNameForLookup(fullName),
     normalizedMobile: mobile.normalized,
   };
 }
@@ -64,8 +59,7 @@ export async function findParticipantByIdentity(
     .where(
       and(
         eq(participants.normalizedMobile, identity.normalizedMobile),
-        eq(participants.normalizedFirstName, identity.normalizedFirstName),
-        eq(participants.normalizedLastName, identity.normalizedLastName),
+        eq(participants.normalizedFullName, identity.normalizedFullName),
       ),
     )
     .limit(1);
@@ -73,9 +67,9 @@ export async function findParticipantByIdentity(
 }
 
 /**
- * Find-or-create on the normalized triple. Two simultaneous registrations of
- * the same identity race here; the unique index decides, and the loser re-reads
- * the winner's row rather than failing the request.
+ * Find-or-create on the normalized pair. Two simultaneous registrations of the
+ * same identity race here; the unique index decides, and the loser re-reads the
+ * winner's row rather than failing the request.
  */
 export async function findOrCreateParticipant(
   identity: NormalizedIdentity,
@@ -87,11 +81,9 @@ export async function findOrCreateParticipant(
   const now = nowUtc();
   try {
     await conn.insert(participants).values({
-      firstName: identity.firstName,
-      lastName: identity.lastName,
+      fullName: identity.fullName,
       mobileOriginal: identity.mobileOriginal,
-      normalizedFirstName: identity.normalizedFirstName,
-      normalizedLastName: identity.normalizedLastName,
+      normalizedFullName: identity.normalizedFullName,
       normalizedMobile: identity.normalizedMobile,
       createdAt: now,
       updatedAt: now,

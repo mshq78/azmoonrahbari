@@ -118,7 +118,6 @@ export const adminApi = {
       q?: string;
       status?: string;
       versionId?: number;
-      orgCode?: string;
     },
     signal?: AbortSignal,
   ) =>
@@ -147,7 +146,7 @@ export const adminApi = {
   deleteMedia: (id: number) =>
     admin<{ deleted: boolean }>(ADMIN_ROUTES.mediaItem(id), { method: 'DELETE' }),
 
-  exportUrl: (params: { status?: string; versionId?: number; orgCode?: string }) => {
+  exportUrl: (params: { status?: string; versionId?: number }) => {
     const query = toQuery(params);
     return query ? `${ADMIN_ROUTES.exportAttemptsCsv}?${query}` : ADMIN_ROUTES.exportAttemptsCsv;
   },

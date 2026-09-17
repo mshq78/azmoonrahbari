@@ -3,7 +3,6 @@ import { db } from '../../db/client';
 import { testAttempts, type TestAttemptRow } from '../../db/schema/index';
 import { ERROR_CODES, serviceUnavailable } from '../../shared/errors';
 import { generatePublicId } from '../../shared/ids';
-import { normalizeOrgCode } from '../../shared/normalize';
 import { nowUtc } from '../../shared/time';
 import {
   findOrCreateParticipant,
@@ -14,10 +13,8 @@ import { getActiveVersion } from '../questionnaire/repository';
 import { getAttemptByParticipantId } from './repository';
 
 export interface StartOrResumeInput {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobile: string;
-  orgCode?: string;
 }
 
 /**
@@ -30,7 +27,6 @@ export interface StartOrResumeInput {
  */
 export async function startOrResume(input: StartOrResumeInput): Promise<TestAttemptRow> {
   const identity = normalizeIdentity(input);
-  const orgCode = normalizeOrgCode(input.orgCode);
 
   const activeVersion = await getActiveVersion();
   if (!activeVersion) {
@@ -43,14 +39,13 @@ export async function startOrResume(input: StartOrResumeInput): Promise<TestAtte
     const existing = await getAttemptByParticipantId(participant.id, tx);
     if (existing) {
       const now = nowUtc();
-      // Only the org code and activity clock move on resume; the attempt keeps
-      // its own version, status, answers and tracking code.
-      const nextOrgCode = orgCode ?? existing.orgCode;
+      // Only the activity clock moves on resume; the attempt keeps its own
+      // version, status, answers and tracking code.
       await tx
         .update(testAttempts)
-        .set({ lastActivityAt: now, updatedAt: now, orgCode: nextOrgCode })
+        .set({ lastActivityAt: now, updatedAt: now })
         .where(eq(testAttempts.id, existing.id));
-      return { ...existing, lastActivityAt: now, updatedAt: now, orgCode: nextOrgCode };
+      return { ...existing, lastActivityAt: now, updatedAt: now };
     }
 
     const now = nowUtc();
@@ -59,7 +54,6 @@ export async function startOrResume(input: StartOrResumeInput): Promise<TestAtte
         publicId: generatePublicId(),
         participantId: participant.id,
         testVersionId: activeVersion.id,
-        orgCode,
         status: 'NotStarted',
         lastActivityAt: now,
         createdAt: now,

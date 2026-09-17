@@ -67,6 +67,26 @@
   /* Engraved border styling */
   --card-shadow: 0 4px 18px rgba(14, 35, 64, 0.06);
   --gold-edge: 0 0 0 1px rgba(201, 162, 39, 0.35);
+
+  /* Elevation. Two soft layers read as depth without a hard drop shadow. */
+  --shadow-sm: 0 1px 2px rgba(14, 35, 64, 0.04), 0 1px 3px rgba(14, 35, 64, 0.06);
+  --shadow-md: 0 2px 4px rgba(14, 35, 64, 0.04), 0 8px 24px rgba(14, 35, 64, 0.08);
+  --shadow-lg: 0 4px 8px rgba(14, 35, 64, 0.05), 0 16px 48px rgba(14, 35, 64, 0.12);
+}
+
+/* Shape and motion are theme-independent: one scale for the whole app, so a
+   new surface never has to invent its own radius or easing. */
+:root {
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
 }
 
 .dark, [data-theme="dark"] {
@@ -99,6 +119,10 @@
   /* Engraved border styling */
   --card-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
   --gold-edge: 0 0 0 1px rgba(242, 193, 78, 0.4);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
 body {
@@ -132,4 +156,87 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+   --------------------------------------------------------------------------- */
+
+/*
+ * Question-to-question transition. The new question enters from the side the
+ * participant is travelling towards, which in a right-to-left layout means a
+ * forward step slides in from the left. The small vertical lift keeps it from
+ * reading as a flat carousel.
+ */
+@keyframes question-enter-forward {
+  from {
+    opacity: 0;
+    transform: translate3d(-24px, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes question-enter-back {
+  from {
+    opacity: 0;
+    transform: translate3d(24px, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.question-enter-forward {
+  animation: question-enter-forward var(--dur-slow) var(--ease-out) both;
+}
+
+.question-enter-back {
+  animation: question-enter-back var(--dur-slow) var(--ease-out) both;
+}
+
+/* The options arrive just behind the question text rather than with it, so the
+   eye lands on the question first. Each row is delayed by its own index. */
+@keyframes option-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.option-enter {
+  animation: option-enter var(--dur-base) var(--ease-out) both;
+  animation-delay: calc(90ms + var(--stagger-index, 0) * 55ms);
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fade-rise {
+  animation: fade-rise var(--dur-slow) var(--ease-out) both;
+}
+
+/*
+ * The GERA logo is navy and its wordmark all but disappears on the dark theme,
+ * so it always sits on a light plate rather than directly on the page.
+ */
+.gera-plate {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }

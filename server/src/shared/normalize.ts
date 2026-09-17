@@ -94,13 +94,3 @@ export function cleanMobileForDisplay(input: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
-
-/** Optional free-text codes (org/course) get the same invisible-character treatment. */
-export function normalizeOrgCode(input: string | undefined | null): string | null {
-  if (input === undefined || input === null) return null;
-  const cleaned = toAsciiDigits(input)
-    .replace(INVISIBLE_PATTERN, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return cleaned.length > 0 ? cleaned : null;
-}

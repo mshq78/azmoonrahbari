@@ -22,7 +22,6 @@ export interface AttemptFilters {
   q?: string;
   status?: AttemptStatus;
   versionId?: number;
-  orgCode?: string;
 }
 
 /**
@@ -34,7 +33,6 @@ export function buildAttemptFilters(filters: AttemptFilters): SQL | undefined {
 
   if (filters.status) clauses.push(eq(testAttempts.status, filters.status));
   if (filters.versionId) clauses.push(eq(testAttempts.testVersionId, filters.versionId));
-  if (filters.orgCode) clauses.push(eq(testAttempts.orgCode, filters.orgCode));
 
   const term = filters.q?.trim();
   if (term) {
@@ -42,8 +40,7 @@ export function buildAttemptFilters(filters: AttemptFilters): SQL | undefined {
     // tracking code; all three are tried.
     const nameTerm = `%${escapeLike(normalizeNameForLookup(term))}%`;
     const searchClauses: SQL[] = [
-      like(participants.normalizedFirstName, nameTerm),
-      like(participants.normalizedLastName, nameTerm),
+      like(participants.normalizedFullName, nameTerm),
       like(testAttempts.trackingCode, `%${escapeLike(term.toUpperCase())}%`),
     ];
 
@@ -72,10 +69,8 @@ const attemptSelection = {
   id: testAttempts.id,
   publicId: testAttempts.publicId,
   participantId: testAttempts.participantId,
-  firstName: participants.firstName,
-  lastName: participants.lastName,
+  fullName: participants.fullName,
   mobile: participants.mobileOriginal,
-  orgCode: testAttempts.orgCode,
   status: testAttempts.status,
   versionNumber: testVersions.versionNumber,
   trackingCode: testAttempts.trackingCode,
@@ -95,10 +90,8 @@ function toAdminAttemptRow(row: RawAttemptRow): AdminAttemptRow {
     id: row.id as number,
     publicId: row.publicId as string,
     participantId: row.participantId as number,
-    firstName: row.firstName as string,
-    lastName: row.lastName as string,
+    fullName: row.fullName as string,
     mobile: row.mobile as string,
-    orgCode: (row.orgCode as string | null) ?? null,
     status: row.status as AttemptStatus,
     versionNumber: row.versionNumber as number,
     trackingCode: (row.trackingCode as string | null) ?? null,

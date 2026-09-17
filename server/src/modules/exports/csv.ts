@@ -56,10 +56,8 @@ export async function buildAttemptsCsv(filters: AttemptFilters): Promise<string>
 
   const header = [
     'id',
-    'firstName',
-    'lastName',
+    'fullName',
     'mobile',
-    'orgCode',
     'status',
     'version',
     'createdAt',
@@ -80,10 +78,8 @@ export async function buildAttemptsCsv(filters: AttemptFilters): Promise<string>
 
     const row = [
       attempt.id,
-      attempt.firstName,
-      attempt.lastName,
+      attempt.fullName,
       attempt.mobile,
-      attempt.orgCode ?? '',
       attempt.status,
       attempt.versionNumber,
       attempt.createdAt,

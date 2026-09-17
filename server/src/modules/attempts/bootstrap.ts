@@ -65,10 +65,8 @@ export async function buildBootstrap(
       trackingCode: attempt.trackingCode,
     },
     participant: {
-      firstName: participant.firstName,
-      lastName: participant.lastName,
+      fullName: participant.fullName,
       mobile: participant.mobileOriginal,
-      orgCode: attempt.orgCode,
     },
     content: {
       versionNumber: content.version.versionNumber,

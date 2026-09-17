@@ -21,25 +21,48 @@ function looksLikeIranianMobile(value: string): boolean {
 }
 
 interface FieldErrors {
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   mobile?: string;
 }
 
-const inputClass = (hasError: boolean) =>
-  `w-full min-h-[48px] px-4 py-2.5 rounded-lg border bg-[var(--surface-app)] text-[var(--text-primary)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent-gold)] ${
-    hasError ? 'border-red-600 dark:border-red-400' : 'border-[var(--border-strong)]'
-  }`;
+interface FieldProps {
+  id: 'fullName' | 'mobile';
+  label: string;
+  error?: string;
+  children: (describedBy: string | undefined, invalid: boolean) => React.ReactNode;
+}
+
+const Field: React.FC<FieldProps> = ({ id, label, error, children }) => (
+  <div>
+    <label
+      htmlFor={id}
+      className="block text-[13px] font-semibold text-[var(--text-secondary)] mb-2"
+    >
+      {label}
+    </label>
+    {children(error ? `${id}-error` : undefined, Boolean(error))}
+    {error && (
+      <p id={`${id}-error`} role="alert" className="mt-2 text-[13px] text-red-600 dark:text-red-400">
+        {error}
+      </p>
+    )}
+  </div>
+);
+
+const inputClass = (invalid: boolean) =>
+  `w-full min-h-[52px] px-4 rounded-[var(--radius-md)] border bg-[var(--surface-app)] text-[var(--text-primary)] text-[17px]
+   placeholder:text-[var(--text-muted)] placeholder:text-[15px]
+   transition-[border-color,box-shadow] duration-200
+   focus:outline-none focus:border-[var(--accent-gold)] focus:shadow-[0_0_0_3px_var(--selected-tint)]
+   ${invalid ? 'border-red-500' : 'border-[var(--border-subtle)] hover:border-[var(--border-strong)]'}`;
 
 export const EntryScreen: React.FC = () => {
   const navigate = useNavigate();
   const config = useConfig();
   const startOrResume = useStartOrResume();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [mobile, setMobile] = useState('');
-  const [orgCode, setOrgCode] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
 
   if (config.data && !config.data.registrationOpen) return <UnavailableState />;
@@ -48,8 +71,7 @@ export const EntryScreen: React.FC = () => {
     event.preventDefault();
 
     const nextErrors: FieldErrors = {};
-    if (!firstName.trim()) nextErrors.firstName = uiContent.entry.validations.firstNameRequired;
-    if (!lastName.trim()) nextErrors.lastName = uiContent.entry.validations.lastNameRequired;
+    if (fullName.trim().length < 2) nextErrors.fullName = uiContent.entry.validations.fullNameRequired;
     if (!looksLikeIranianMobile(mobile)) nextErrors.mobile = uiContent.entry.validations.mobileInvalid;
 
     setErrors(nextErrors);
@@ -57,10 +79,8 @@ export const EntryScreen: React.FC = () => {
 
     try {
       const bootstrap = await startOrResume.mutateAsync({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        fullName: fullName.trim(),
         mobile: mobile.trim(),
-        ...(orgCode.trim() ? { orgCode: orgCode.trim() } : {}),
       });
       navigate(resolveDestination(bootstrap), { replace: true });
     } catch {
@@ -70,150 +90,80 @@ export const EntryScreen: React.FC = () => {
 
   return (
     <PageShell centered footer={uiContent.footer.entry}>
-      <div className="text-right">
-        <div className="w-12 h-[2px] bg-[var(--accent-gold)] mb-4" aria-hidden="true" />
+      <div className="text-right fade-rise">
+        <span className="block w-9 h-[3px] rounded-full bg-[var(--accent-gold)] mb-5" aria-hidden="true" />
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-2">
+        <h1 className="text-[26px] sm:text-[30px] font-bold text-[var(--text-primary)] leading-[1.45] tracking-tight text-balance">
           {uiContent.entry.title}
         </h1>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-5 pt-4">
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5"
-            >
-              {uiContent.entry.firstNameLabel}{' '}
-              <span className="text-[var(--accent-gold)]">*</span>
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              autoComplete="given-name"
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined }));
-              }}
-              aria-invalid={Boolean(errors.firstName)}
-              aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-              className={inputClass(Boolean(errors.firstName))}
-            />
-            {errors.firstName && (
-              <p
-                id="firstName-error"
-                role="alert"
-                className="mt-1.5 text-sm text-red-600 dark:text-red-400 font-medium"
-              >
-                {errors.firstName}
-              </p>
+        <form onSubmit={handleSubmit} noValidate className="space-y-5 pt-8">
+          <Field id="fullName" label={uiContent.entry.fullNameLabel} error={errors.fullName}>
+            {(describedBy, invalid) => (
+              <input
+                id="fullName"
+                type="text"
+                autoComplete="name"
+                enterKeyHint="next"
+                placeholder={uiContent.entry.fullNamePlaceholder}
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
+                }}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={inputClass(invalid)}
+              />
             )}
-          </div>
+          </Field>
 
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5"
-            >
-              {uiContent.entry.lastNameLabel} <span className="text-[var(--accent-gold)]">*</span>
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              autoComplete="family-name"
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined }));
-              }}
-              aria-invalid={Boolean(errors.lastName)}
-              aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-              className={inputClass(Boolean(errors.lastName))}
-            />
-            {errors.lastName && (
-              <p
-                id="lastName-error"
-                role="alert"
-                className="mt-1.5 text-sm text-red-600 dark:text-red-400 font-medium"
-              >
-                {errors.lastName}
-              </p>
+          <Field id="mobile" label={uiContent.entry.mobileLabel} error={errors.mobile}>
+            {(describedBy, invalid) => (
+              <input
+                id="mobile"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                enterKeyHint="go"
+                dir="ltr"
+                placeholder={uiContent.entry.mobilePlaceholder}
+                value={mobile}
+                onChange={(e) => {
+                  setMobile(e.target.value);
+                  if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: undefined }));
+                }}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={`${inputClass(invalid)} text-left font-mono tracking-wide`}
+              />
             )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="mobile"
-              className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5"
-            >
-              {uiContent.entry.mobileLabel} <span className="text-[var(--accent-gold)]">*</span>
-            </label>
-            <input
-              id="mobile"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder={uiContent.entry.mobilePlaceholder}
-              value={mobile}
-              onChange={(e) => {
-                setMobile(e.target.value);
-                if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: undefined }));
-              }}
-              aria-invalid={Boolean(errors.mobile)}
-              aria-describedby={errors.mobile ? 'mobile-error' : undefined}
-              className={`${inputClass(Boolean(errors.mobile))} text-right`}
-            />
-            {errors.mobile && (
-              <p
-                id="mobile-error"
-                role="alert"
-                className="mt-1.5 text-sm text-red-600 dark:text-red-400 font-medium"
-              >
-                {errors.mobile}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="orgCode"
-              className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5"
-            >
-              {uiContent.entry.orgCodeLabel}
-            </label>
-            <input
-              id="orgCode"
-              type="text"
-              value={orgCode}
-              onChange={(e) => setOrgCode(e.target.value)}
-              className="w-full min-h-[48px] px-4 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-app)] text-[var(--text-primary)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent-gold)]"
-            />
-          </div>
+          </Field>
 
           {startOrResume.isError && (
             <p
               role="alert"
-              className="text-sm text-red-600 dark:text-red-400 font-medium bg-red-500/10 rounded-lg px-3.5 py-2.5"
+              className="text-[13px] text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-[var(--radius-md)] px-4 py-3"
             >
               {startOrResume.error.message}
             </p>
           )}
 
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed pt-2">
-            {uiContent.entry.privacyNotice}
-          </p>
-
-          <div className="pt-4">
+          <div className="pt-3">
             <Button
               type="submit"
               variant="primary"
               fullWidth
               isLoading={startOrResume.isPending}
-              className="text-lg py-3.5"
+              className="text-[17px] min-h-[54px] rounded-[var(--radius-md)]"
             >
               {uiContent.entry.submitButton}
             </Button>
           </div>
+
+          <p className="text-[12px] text-[var(--text-muted)] leading-relaxed text-center pt-1">
+            {uiContent.entry.privacyNotice}
+          </p>
         </form>
       </div>
     </PageShell>

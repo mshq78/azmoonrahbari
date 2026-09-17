@@ -13,10 +13,9 @@ interface Filters {
   q: string;
   status: AttemptStatus | '';
   versionId: number | '';
-  orgCode: string;
 }
 
-const EMPTY_FILTERS: Filters = { q: '', status: '', versionId: '', orgCode: '' };
+const EMPTY_FILTERS: Filters = { q: '', status: '', versionId: '' };
 
 export const AdminParticipants: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -38,7 +37,6 @@ export const AdminParticipants: React.FC = () => {
       ...(applied.q ? { q: applied.q } : {}),
       ...(applied.status ? { status: applied.status } : {}),
       ...(applied.versionId ? { versionId: applied.versionId } : {}),
-      ...(applied.orgCode ? { orgCode: applied.orgCode } : {}),
     }),
     [page, applied],
   );
@@ -71,7 +69,6 @@ export const AdminParticipants: React.FC = () => {
           href={adminApi.exportUrl({
             ...(applied.status ? { status: applied.status } : {}),
             ...(applied.versionId ? { versionId: applied.versionId } : {}),
-            ...(applied.orgCode ? { orgCode: applied.orgCode } : {}),
           })}
           className="min-h-[44px] inline-flex items-center px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--surface-app)] text-sm font-semibold hover:border-[var(--accent-gold)]"
         >
@@ -125,15 +122,6 @@ export const AdminParticipants: React.FC = () => {
             ))}
           </select>
 
-          <input
-            type="text"
-            value={draft.orgCode}
-            onChange={(event) => setDraft((prev) => ({ ...prev, orgCode: event.target.value }))}
-            placeholder={adminContent.participants.orgCodePlaceholder}
-            aria-label={adminContent.participants.columns.orgCode}
-            className={`${controlClass} w-36`}
-          />
-
           <button
             type="submit"
             className="min-h-[44px] px-4 rounded-lg bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] text-sm font-semibold"
@@ -167,7 +155,6 @@ export const AdminParticipants: React.FC = () => {
                 <tr>
                   <Th>{adminContent.participants.columns.name}</Th>
                   <Th>{adminContent.participants.columns.mobile}</Th>
-                  <Th>{adminContent.participants.columns.orgCode}</Th>
                   <Th>{adminContent.participants.columns.status}</Th>
                   <Th>{adminContent.participants.columns.version}</Th>
                   <Th>{adminContent.participants.columns.result}</Th>
@@ -180,12 +167,11 @@ export const AdminParticipants: React.FC = () => {
                 {list.data.items.map((attempt) => (
                   <tr key={attempt.id}>
                     <Td>
-                      {attempt.firstName} {attempt.lastName}
+                      {attempt.fullName}
                     </Td>
                     <Td className="font-mono" >
                       <span dir="ltr">{attempt.mobile}</span>
                     </Td>
-                    <Td>{attempt.orgCode ?? adminContent.common.none}</Td>
                     <Td>
                       <Badge tone={attempt.status === 'Completed' ? 'gold' : 'neutral'}>
                         {adminContent.status[attempt.status]}

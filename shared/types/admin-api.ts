@@ -38,10 +38,8 @@ export interface AdminAttemptRow {
   id: number;
   publicId: string;
   participantId: number;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   mobile: string;
-  orgCode: string | null;
   status: AttemptStatus;
   versionNumber: number;
   trackingCode: string | null;

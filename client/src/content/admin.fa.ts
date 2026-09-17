@@ -69,13 +69,11 @@ export const adminContent = {
     searchPlaceholder: 'نام، نام خانوادگی، موبایل یا کد رهگیری',
     allStatuses: 'همهٔ وضعیت‌ها',
     allVersions: 'همهٔ نسخه‌ها',
-    orgCodePlaceholder: 'کد سازمان',
     exportCsv: 'خروجی CSV',
     empty: 'موردی یافت نشد.',
     columns: {
       name: 'نام و نام خانوادگی',
       mobile: 'موبایل',
-      orgCode: 'کد سازمان',
       status: 'وضعیت',
       version: 'نسخه',
       result: 'نتیجه',
