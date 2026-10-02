@@ -92,6 +92,7 @@ export const uiContent = {
     shareCopied: 'کپی شد',
     imageError: 'آماده‌سازی تصویر کارت انجام نشد. دوباره تلاش کن.',
     downloadFileName: 'karte-man.png',
+    returnToSite: 'بازگشت به سایت',
     copyLink: 'کپی لینک',
     linkCopied: 'لینک کپی شد',
     trackingPrefix: 'کد رهگیری تو:',

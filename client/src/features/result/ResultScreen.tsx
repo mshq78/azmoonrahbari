@@ -4,6 +4,7 @@ import { AlertCircle, Check, Download, Loader2, Share2 } from 'lucide-react';
 import { charactersData, type CharacterCode } from '../../content/characters.fa';
 import { uiContent } from '../../content/ui.fa';
 import { PageShell } from '../../components/PageShell';
+import { ReturnButton } from '../../components/ReturnButton';
 import { useAttempt } from '../attempt/AttemptContext';
 import { ResultCard } from './ResultCard';
 import { renderVisibleCardToFile, renderVisibleCardToPng } from './cardImage';
@@ -84,6 +85,7 @@ export const ResultScreen: React.FC = () => {
       <ResultCard
         characterCode={characterCode}
         trackingCode={bootstrap.attempt.trackingCode}
+        closing={<ReturnButton />}
         actions={
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

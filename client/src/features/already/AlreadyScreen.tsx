@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import type { CharacterCode } from '../../content/characters.fa';
 import { uiContent } from '../../content/ui.fa';
 import { PageShell } from '../../components/PageShell';
+import { ReturnButton } from '../../components/ReturnButton';
 import { useAttempt } from '../attempt/AttemptContext';
 import { ResultCard } from '../result/ResultCard';
 
@@ -22,6 +23,7 @@ export const AlreadyScreen: React.FC = () => {
         trackingCode={bootstrap.attempt.trackingCode}
         heading={uiContent.already.heading}
         subtitle={uiContent.already.subtitle}
+        closing={<ReturnButton />}
       />
     </PageShell>
   );

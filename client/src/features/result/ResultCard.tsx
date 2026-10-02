@@ -11,6 +11,8 @@ export interface ResultCardProps {
   heading?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  /** Rendered last, after the card text — where the participant's visit ends. */
+  closing?: React.ReactNode;
 }
 
 /**
@@ -23,6 +25,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   heading,
   subtitle,
   actions,
+  closing,
 }) => {
   const character = charactersData[characterCode];
   const [copied, setCopied] = useState(false);
@@ -102,6 +105,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       )}
 
       <Collapsible character={character} />
+
+      {closing}
     </div>
   );
 };
