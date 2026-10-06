@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { BRAND_CONFIG } from '../config/brand';
 import { type CharacterCardData } from '../content/characters.fa';
 import { uiContent } from '../content/ui.fa';
 
@@ -112,7 +113,7 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
                 </div>
 
                 <div className="pb-2 z-10 text-[11px] text-[#C9A227]/90 font-medium">
-                  رهبری هوشیار
+                  {BRAND_CONFIG.brandName}
                 </div>
               </div>
             )}
@@ -172,7 +173,7 @@ export const CardFlip: React.FC<CardFlipProps> = ({ character }) => {
                 </div>
 
                 <div className="pb-2 z-10 text-[11px] text-[#C9A227]/90 font-medium">
-                  رهبری هوشیار
+                  {BRAND_CONFIG.brandName}
                 </div>
               </div>
             )}

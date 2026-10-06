@@ -1,4 +1,4 @@
-# وقت تصمیم، شبیه کدومی؟ — رهبری هوشیار
+# وقت تصمیم، شبیه کدومی؟ — تصمیم نما
 
 A Persian, right-to-left, 12-question decision-style game that reveals one of five
 historical characters, plus the admin panel that runs it.
@@ -526,9 +526,16 @@ VITE_PUBLIC_ORIGIN=https://example.com npm run build
 Unset, the tags degrade to relative paths rather than shipping a literal
 placeholder. Set it on the host that builds for production.
 
-**Icons.** `favicon.svg`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
+**Icons.** `favicon.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
 and `og-image.png` live in `client/public/` and are referenced from
-`manifest.webmanifest`, which makes the game installable on a phone.
+`manifest.webmanifest`, which makes the game installable on a phone. All of them
+come from the GERA mark (`gera-mark.png` is the same mark, transparent, for the
+header and footer chips). The mark was supplied on a black background rather than
+a transparent one, so its transparency was recovered from the brightest colour
+channel; if the logo is ever replaced, supply a transparent PNG and skip that
+step. Only `apple-touch-icon.png` and the two `icon-*` files are opaque, on
+purpose — iOS fills transparency with black, and Android masks maskable icons to
+a circle — and they keep the mark inside the central 55-62% for the same reason.
 
 ---
 

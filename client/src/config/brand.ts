@@ -1,12 +1,12 @@
 /**
- * Brand configuration for «رهبری هوشیار».
+ * Brand configuration for «تصمیم نما».
  *
  * Tracking codes are generated server-side and carry no prefix, so nothing
  * about them belongs here.
  */
 
 export const BRAND_CONFIG = {
-  brandName: 'رهبری هوشیار',
+  brandName: 'تصمیم نما',
   brandTagline: 'توسعهٔ قابلیت‌های تصمیم‌گیری در رهبری سازمانی',
 
   /** The campus the programme belongs to; credited on every screen. */

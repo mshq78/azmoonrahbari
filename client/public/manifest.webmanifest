@@ -1,7 +1,7 @@
 {
   "name": "وقت تصمیم، شبیه کدومی؟",
   "short_name": "وقت تصمیم",
-  "description": "بازی ۱۲ موقعیتی سبک تصمیم‌گیری مدیران و مقایسه با ۵ شخصیت تاریخی — رهبری هوشیار",
+  "description": "بازی ۱۲ موقعیتی سبک تصمیم‌گیری مدیران و مقایسه با ۵ شخصیت تاریخی — تصمیم نما",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -23,9 +23,9 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
     }
   ]
 }
